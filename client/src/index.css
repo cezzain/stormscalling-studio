@@ -1,0 +1,186 @@
+@import './styles/theme.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   Globals — mirror the mockup's inline <style> block
+   ========================================================================== */
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; padding: 0; height: 100%; }
+
+body {
+  background: var(--canvas);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  color: var(--ink);
+}
+
+::selection { background: var(--clay-soft); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
+
+button { font-family: inherit; }
+
+/* ============================================================================
+   Liquid glass — ubiquitous frosted surfaces
+   ========================================================================== */
+.glass {
+  background: var(--glass) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(155%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(155%);
+  box-shadow: var(--glass-sheen), var(--glass-shadow) !important;
+}
+.glass-2 {
+  background: var(--glass-2) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  box-shadow: var(--glass-sheen), var(--glass-shadow) !important;
+}
+/* a softer inner-content glass (writing column) — frost only, keeps the
+   element's own translucent background + shadow so text stays readable */
+.glass-soft {
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 6px)) saturate(135%);
+  backdrop-filter: blur(calc(var(--glass-blur) - 6px)) saturate(135%);
+}
+
+/* Header, sidebar, and chat panel frost automatically (their bg tokens are
+   already translucent — this just adds the blur + a glassy hairline). */
+header,
+aside {
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+}
+
+/* App-wide aurora that the glass refracts. Sits behind all app content. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -25%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 40% at 16% 20%, var(--aurora-1), transparent 70%),
+    radial-gradient(42% 44% at 84% 26%, var(--aurora-2), transparent 72%),
+    radial-gradient(48% 50% at 54% 86%, var(--aurora-3), transparent 72%);
+  filter: blur(50px) saturate(125%);
+  opacity: 0.5;
+  animation: aurora 44s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes aurora {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(3%, -2%) scale(1.08); }
+  100% { transform: translate(-3%, 2%) scale(1.05); }
+}
+
+/* ============================================================================
+   TipTap / ProseMirror — manuscript editor surface
+   ========================================================================== */
+.manuscript .ProseMirror {
+  outline: none;
+  font-family: var(--ms-font, var(--font-body));
+  font-size: var(--ms-size, 19px);
+  line-height: 1.82;
+  color: var(--ink);
+}
+.manuscript .ProseMirror > * + * { margin-top: 0.9em; }
+.manuscript .ProseMirror p { margin: 0; }
+.manuscript .ProseMirror h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1.15;
+  margin: 0.4em 0 0.2em;
+}
+.manuscript .ProseMirror h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 27px;
+  line-height: 1.2;
+  margin: 0.4em 0 0.2em;
+}
+.manuscript .ProseMirror h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+  margin: 0.4em 0 0.2em;
+}
+.manuscript .ProseMirror blockquote {
+  border-left: 3px solid var(--line-2);
+  padding-left: 1em;
+  margin-left: 0;
+  font-style: italic;
+  color: var(--ink-2);
+}
+.manuscript .ProseMirror ul,
+.manuscript .ProseMirror ol { padding-left: 1.4em; margin: 0; }
+.manuscript .ProseMirror li { margin: 0.2em 0; }
+.manuscript .ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0.2em;
+}
+.manuscript .ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+.manuscript .ProseMirror ul[data-type="taskList"] li > label { margin-top: 0.45em; }
+.manuscript .ProseMirror hr {
+  border: none;
+  border-top: 1px solid var(--line-2);
+  margin: 1.4em 0;
+}
+.manuscript .ProseMirror img {
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-s);
+  margin: 0.4em 0;
+}
+.manuscript .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid var(--clay);
+}
+.manuscript .ProseMirror a { color: var(--clay); text-decoration: underline; }
+
+/* placeholder for empty paragraphs (StarterKit Placeholder extension) */
+.manuscript .ProseMirror p.is-editor-empty:first-child::before,
+.manuscript .ProseMirror .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--ink-3);
+  pointer-events: none;
+  height: 0;
+}
+
+/* @-mention pills — match the mockup's data-entity spans */
+.mention {
+  color: var(--clay);
+  background: var(--clay-soft);
+  padding: 1px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+
+/* AI suggestion highlight (changed text in diff suggestion) */
+.ai-changed { background: var(--clay-soft); border-radius: 4px; padding: 0 2px; }
+
+/* hide default focus ring on contenteditable */
+[contenteditable]:focus { outline: none; }
+
+/* react-zoom-pan-pinch should fill its parent */
+.rzpp-wrap, .react-transform-wrapper, .react-transform-component {
+  width: 100% !important;
+  height: 100% !important;
+}

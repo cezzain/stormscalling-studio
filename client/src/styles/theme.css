@@ -1,0 +1,240 @@
+/* ============================================================================
+   Storm's Calling Studio — design tokens
+   Copied verbatim from the Claude Design mockup (Storm's Calling Studio.dc.html).
+   The mockup is the source of truth for all colours, fonts, radii, shadows.
+   ========================================================================== */
+
+:root {
+  --canvas: #E7DECF;
+  --surface: rgba(241, 235, 221, 0.66);
+  --surface-2: rgba(251, 247, 239, 0.70);
+  --column: rgba(252, 250, 244, 0.82);
+  --ink: #2B2D22;
+  --ink-2: #5E604E;
+  --ink-3: #9B9882;
+  --line: rgba(43, 45, 34, 0.12);
+  --line-2: rgba(43, 45, 34, 0.20);
+  --forest: #2E4030;
+  --forest-2: #3C5240;
+  --sage: #7E8C6E;
+  --tan: #C9B69E;
+  --clay: #A8693C;
+  --clay-2: #8E5630;
+  --clay-soft: rgba(168, 105, 60, 0.13);
+  --s-draft: #9B9882;
+  --s-revised: #BD8A4E;
+  --s-done: #5E7D54;
+  --danger: #B4513C;
+  --shadow-s: 0 1px 2px rgba(43, 45, 34, .07);
+  --shadow: 0 1px 2px rgba(43, 45, 34, .06), 0 10px 28px rgba(43, 45, 34, .09);
+  /* ---- liquid glass ---- */
+  --glass: rgba(245, 240, 228, 0.52);
+  --glass-2: rgba(252, 249, 242, 0.66);
+  --glass-line: rgba(255, 255, 255, 0.45);
+  --glass-blur: 16px;
+  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .6), inset 0 0 0 1px rgba(255, 255, 255, .14), inset 0 -10px 24px rgba(43, 45, 34, .03);
+  --glass-shadow: 0 1px 2px rgba(43, 45, 34, .05), 0 14px 38px rgba(43, 45, 34, .14);
+  --aurora-1: rgba(46, 64, 48, 0.5);
+  --aurora-2: rgba(168, 105, 60, 0.4);
+  --aurora-3: rgba(126, 140, 110, 0.4);
+  --font-display: 'IM Fell English', Georgia, serif;
+  --font-body: 'Lora', Georgia, serif;
+  --font-ui: 'Inter', -apple-system, system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  --canvas: #141A14;
+  --surface: rgba(29, 36, 28, 0.58);
+  --surface-2: rgba(40, 49, 42, 0.62);
+  --column: rgba(26, 33, 26, 0.80);
+  --ink: #EAE4D5;
+  --ink-2: #A6AA94;
+  --ink-3: #6C7061;
+  --line: rgba(234, 228, 213, 0.10);
+  --line-2: rgba(234, 228, 213, 0.18);
+  --forest: #4C6C4F;
+  --forest-2: #5A7C5C;
+  --sage: #8EA17F;
+  --tan: #B6A284;
+  --clay: #CB8E5E;
+  --clay-2: #DB9F6F;
+  --clay-soft: rgba(203, 142, 94, 0.16);
+  --s-draft: #6C7061;
+  --s-revised: #D49A57;
+  --s-done: #7BA06E;
+  --danger: #C8654E;
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, .3);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 34px rgba(0, 0, 0, .45);
+  /* ---- liquid glass (dark) ---- */
+  --glass: rgba(28, 35, 27, 0.46);
+  --glass-2: rgba(40, 49, 42, 0.6);
+  --glass-line: rgba(255, 255, 255, 0.10);
+  --glass-blur: 18px;
+  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 0 0 1px rgba(255, 255, 255, .05), inset 0 -10px 26px rgba(0, 0, 0, .18);
+  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 16px 44px rgba(0, 0, 0, .55);
+  --aurora-1: rgba(76, 108, 79, 0.55);
+  --aurora-2: rgba(203, 142, 94, 0.42);
+  --aurora-3: rgba(142, 161, 127, 0.4);
+}
+
+/* ============================================================================
+   Extra colour schemes. Each overrides only what differs from the parchment
+   default (:root) — glass blur / sheen are inherited.
+   ========================================================================== */
+
+/* ---- Coral — warm peach + coral + rose ---- */
+[data-theme="coral"] {
+  --canvas: #F7E7DE;
+  --surface: rgba(255, 241, 235, 0.66);
+  --surface-2: rgba(255, 247, 243, 0.70);
+  --column: rgba(255, 250, 247, 0.84);
+  --ink: #3A2A28;
+  --ink-2: #6E5550;
+  --ink-3: #B08C84;
+  --line: rgba(58, 42, 40, 0.12);
+  --line-2: rgba(58, 42, 40, 0.20);
+  --forest: #B5524A;
+  --forest-2: #C7635A;
+  --sage: #D98E7E;
+  --tan: #E8C4B4;
+  --clay: #E76F51;
+  --clay-2: #D55A3C;
+  --clay-soft: rgba(231, 111, 81, 0.14);
+  --s-draft: #B08C84;
+  --s-revised: #E0915C;
+  --s-done: #8DA873;
+  --danger: #C0392B;
+  --glass: rgba(255, 240, 233, 0.55);
+  --glass-2: rgba(255, 247, 242, 0.66);
+  --aurora-1: rgba(231, 111, 81, 0.5);
+  --aurora-2: rgba(217, 142, 126, 0.45);
+  --aurora-3: rgba(232, 196, 180, 0.45);
+}
+
+/* ---- Ocean — pale blue + teal + cyan ---- */
+[data-theme="ocean"] {
+  --canvas: #DCE7EC;
+  --surface: rgba(235, 243, 246, 0.66);
+  --surface-2: rgba(244, 249, 251, 0.70);
+  --column: rgba(248, 252, 253, 0.84);
+  --ink: #1E2A30;
+  --ink-2: #4A5C64;
+  --ink-3: #8AA0A8;
+  --line: rgba(30, 42, 48, 0.12);
+  --line-2: rgba(30, 42, 48, 0.20);
+  --forest: #2C5F6B;
+  --forest-2: #36707E;
+  --sage: #6E9AA0;
+  --tan: #A9C4CC;
+  --clay: #1CA0B3;
+  --clay-2: #178A9B;
+  --clay-soft: rgba(28, 160, 179, 0.14);
+  --s-draft: #8AA0A8;
+  --s-revised: #D9A24E;
+  --s-done: #5FA88F;
+  --danger: #C0533C;
+  --glass: rgba(233, 242, 246, 0.55);
+  --glass-2: rgba(244, 249, 251, 0.66);
+  --aurora-1: rgba(44, 95, 107, 0.5);
+  --aurora-2: rgba(28, 160, 179, 0.4);
+  --aurora-3: rgba(110, 154, 160, 0.4);
+}
+
+/* ---- Plum — lavender + plum + magenta ---- */
+[data-theme="plum"] {
+  --canvas: #E8E0EC;
+  --surface: rgba(243, 238, 247, 0.66);
+  --surface-2: rgba(249, 245, 251, 0.70);
+  --column: rgba(251, 248, 252, 0.84);
+  --ink: #2D2433;
+  --ink-2: #5C4E66;
+  --ink-3: #9A89A6;
+  --line: rgba(45, 36, 51, 0.12);
+  --line-2: rgba(45, 36, 51, 0.20);
+  --forest: #6A4A7A;
+  --forest-2: #7E5A90;
+  --sage: #9E86A8;
+  --tan: #C9B6D2;
+  --clay: #B5548C;
+  --clay-2: #9E3F77;
+  --clay-soft: rgba(181, 84, 140, 0.14);
+  --s-draft: #9A89A6;
+  --s-revised: #C58A5C;
+  --s-done: #7DA86B;
+  --danger: #B33B5A;
+  --glass: rgba(242, 237, 247, 0.55);
+  --glass-2: rgba(249, 245, 251, 0.66);
+  --aurora-1: rgba(106, 74, 122, 0.5);
+  --aurora-2: rgba(181, 84, 140, 0.42);
+  --aurora-3: rgba(158, 134, 168, 0.4);
+}
+
+/* ---- Midnight Coral — dark, warm ---- */
+[data-theme="midnight"] {
+  --canvas: #1A1416;
+  --surface: rgba(38, 28, 30, 0.58);
+  --surface-2: rgba(50, 38, 40, 0.62);
+  --column: rgba(33, 24, 26, 0.80);
+  --ink: #F0E2DA;
+  --ink-2: #B89C92;
+  --ink-3: #7A645E;
+  --line: rgba(240, 226, 218, 0.10);
+  --line-2: rgba(240, 226, 218, 0.18);
+  --forest: #B5524A;
+  --forest-2: #C7635A;
+  --sage: #C08574;
+  --tan: #9A6E60;
+  --clay: #F0855F;
+  --clay-2: #FF9A72;
+  --clay-soft: rgba(240, 133, 95, 0.16);
+  --s-draft: #7A645E;
+  --s-revised: #E0915C;
+  --s-done: #9BB07C;
+  --danger: #E0604A;
+  --glass: rgba(40, 28, 30, 0.46);
+  --glass-2: rgba(52, 38, 40, 0.6);
+  --glass-line: rgba(255, 255, 255, 0.10);
+  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 0 0 1px rgba(255, 255, 255, .05), inset 0 -10px 26px rgba(0, 0, 0, .18);
+  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 16px 44px rgba(0, 0, 0, .55);
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, .3);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 34px rgba(0, 0, 0, .45);
+  --aurora-1: rgba(181, 82, 74, 0.5);
+  --aurora-2: rgba(240, 133, 95, 0.42);
+  --aurora-3: rgba(192, 133, 116, 0.4);
+}
+
+/* ---- animations (from the mockup) ---- */
+@keyframes mist {
+  0%   { transform: translate(-10%, 6%) scale(1.1); opacity: .4 }
+  50%  { transform: translate(10%, -6%) scale(1.35); opacity: .8 }
+  100% { transform: translate(-10%, 6%) scale(1.1); opacity: .4 }
+}
+@keyframes mist2 {
+  0%   { transform: translate(8%, -4%) scale(1.2); opacity: .5 }
+  50%  { transform: translate(-8%, 8%) scale(1.05); opacity: .85 }
+  100% { transform: translate(8%, -4%) scale(1.2); opacity: .5 }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1 }
+  50%      { opacity: .15 }
+}
+@keyframes think {
+  0%, 100% { opacity: .25; transform: translateY(0) }
+  50%      { opacity: 1; transform: translateY(-3px) }
+}
+@keyframes fadeup {
+  from { opacity: 0; transform: translateY(8px) }
+  to   { opacity: 1; transform: none }
+}
+@keyframes overlayin {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+@keyframes panelin {
+  from { opacity: 0; transform: translateX(24px) }
+  to   { opacity: 1; transform: none }
+}
+@keyframes blinkcaret {
+  0%, 100% { opacity: 1 }
+  50%      { opacity: 0 }
+}

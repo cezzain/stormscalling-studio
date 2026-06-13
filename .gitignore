@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Local data — never commit user content, DB, or images
+.env
+.env.local
+data/
+
+# Build output
+dist/
+build/
+client/dist/
+server/dist/
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Handoff bundle (reference only)
+_handoff/
+
+# Local tooling
+.claude/
+_dev.log
+_dev.pid
+_serverboot*.log
