@@ -1,0 +1,33 @@
+# Fly.io config for Storm's Calling Studio (free-tier friendly, persistent data).
+# First-time setup (see README → "Deploy privately"):
+#   fly launch --no-deploy        # or `fly apps create stormscalling-studio`
+#   fly volumes create scs_data --size 1
+#   fly secrets set AUTH_USERNAME=you AUTH_PASSWORD='a-strong-password' SESSION_SECRET="$(openssl rand -hex 32)"
+#   fly secrets set ANTHROPIC_API_KEY=sk-ant-...   # optional, for the co-writer
+#   fly deploy
+
+app = "stormscalling-studio"
+primary_region = "iad"   # change to a region near you (e.g. lhr, fra, sjc)
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0   # scale to zero when idle to stay within the free allowance
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+
+# Persistent disk for the SQLite database + uploaded images.
+[mounts]
+  source = "scs_data"
+  destination = "/app/data"

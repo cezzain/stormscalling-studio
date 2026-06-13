@@ -71,8 +71,51 @@ The server binds to `0.0.0.0`, so you can open the LAN URL on an iPad or iPhone 
 
 ```bash
 npm run build      # builds client + server
-npm start          # serves the built client and API from the backend (default :5174)
+npm start          # serves the built client and API from the backend
 ```
+
+In production the server honours the `PORT` env var (cloud hosts inject it); locally it falls back to `SERVER_PORT` (5174).
+
+---
+
+## Login & private deployment
+
+### Lock the app with a username + password
+
+Set **both** `AUTH_USERNAME` and `AUTH_PASSWORD` (in `.env` locally, or as host secrets when deployed) and the entire app — every API route **and** every uploaded image — sits behind a single‑user, liquid‑glass sign‑in screen. The browser never sees the credentials; the server verifies them and issues a signed, http‑only session cookie (valid 30 days). Add `SESSION_SECRET` (any long random string) to sign that cookie; if you omit it, a stable key is derived from your credentials.
+
+```
+AUTH_USERNAME=you
+AUTH_PASSWORD=a-long-strong-password
+SESSION_SECRET=...        # e.g. `openssl rand -hex 32`
+```
+
+Leave these **unset** (the local default) and there is no login wall — the studio stays frictionless on your own machine. The wall only switches on when the credentials are present, i.e. on your deployment. Sign out anytime from the icon in the top‑right of the header.
+
+### Deploy privately to Fly.io (free, keeps your data)
+
+Because your work lives in a SQLite database + image files under `./data/`, the host needs a **persistent disk** — so static hosts (GitHub Pages, Vercel, Netlify) won't do. The included `Dockerfile` + `fly.toml` deploy to [Fly.io](https://fly.io), which has a free allowance and a persistent volume.
+
+```bash
+# 1. Install flyctl and sign in
+#    https://fly.io/docs/flyctl/install/
+fly auth login
+
+# 2. Create the app (uses the bundled fly.toml; pick a unique name + nearby region)
+fly launch --no-deploy --copy-config --name your-unique-name
+
+# 3. Create the persistent disk for ./data  (1 GB is plenty)
+fly volumes create scs_data --size 1
+
+# 4. Set your private login + (optional) AI key as encrypted secrets
+fly secrets set AUTH_USERNAME=you AUTH_PASSWORD='a-strong-password' SESSION_SECRET="$(openssl rand -hex 32)"
+fly secrets set ANTHROPIC_API_KEY=sk-ant-...        # optional — enables the co-writer
+
+# 5. Ship it
+fly deploy
+```
+
+Fly prints your URL (e.g. `https://your-unique-name.fly.dev`). Open it, sign in, and write from anywhere — only you can get in. The same `Dockerfile` also works on Render or Railway if you'd rather use those (point the service at the repo, add a persistent disk mounted at `/app/data`, and set the same env vars).
 
 ---
 

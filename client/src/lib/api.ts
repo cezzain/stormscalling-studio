@@ -8,8 +8,15 @@ const BASE = '/api';
 async function j<T>(url: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(BASE + url, {
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin', // carry the session cookie
     ...opts,
   });
+  // Session expired or missing while auth is on — let the app fall back to the
+  // login screen instead of surfacing a raw error everywhere.
+  if (res.status === 401) {
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('scs:unauthorized'));
+    throw new Error('401 unauthorized');
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`${res.status} ${text}`);
@@ -20,6 +27,25 @@ async function j<T>(url: string, opts?: RequestInit): Promise<T> {
 
 export const api = {
   status: () => j<{ ok: boolean; provider: string; model: string; hasKey: boolean }>('/status'),
+
+  // ---- auth (single-user login) ----
+  auth: {
+    // Public — tells the client whether a login wall is active and if we're in.
+    status: () => j<{ authRequired: boolean; authed: boolean }>('/auth/status'),
+    // Dedicated fetch so we can surface the server's exact error/lockout message.
+    login: async (username: string, password: string): Promise<{ ok: boolean }> => {
+      const res = await fetch(BASE + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json().catch(() => ({} as any));
+      if (!res.ok) throw new Error(data?.error || 'Sign in failed. Please try again.');
+      return data;
+    },
+    logout: () => j<{ ok: boolean }>('/auth/logout', { method: 'POST' }),
+  },
 
   // ---- pages ----
   pages: {
@@ -56,7 +82,7 @@ export const api = {
   upload: async (file: File): Promise<{ url: string; filename: string }> => {
     const form = new FormData();
     form.append('file', file);
-    const res = await fetch(BASE + '/upload', { method: 'POST', body: form });
+    const res = await fetch(BASE + '/upload', { method: 'POST', body: form, credentials: 'same-origin' });
     if (!res.ok) throw new Error('upload failed');
     return res.json();
   },
@@ -150,6 +176,7 @@ export function streamChat(
       const res = await fetch(BASE + '/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify(body),
         signal: controller.signal,
       });

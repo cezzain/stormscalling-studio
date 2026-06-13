@@ -17,11 +17,28 @@ export const DATA_DIR = path.join(PROJECT_ROOT, 'data');
 export const DB_PATH = path.join(DATA_DIR, 'storms-calling.db');
 export const IMAGES_DIR = path.join(DATA_DIR, 'images');
 
+export const IS_PROD = process.env.NODE_ENV === 'production';
+
 // ---- Network ----
-// Use a dedicated SERVER_PORT (not the generic PORT) so the backend never
-// collides with a frontend dev/preview server that consumes PORT itself.
-export const PORT = Number(process.env.SERVER_PORT ?? 5174);
+// In local dev the backend MUST use the dedicated SERVER_PORT (default 5174) so
+// it never collides with the frontend dev/preview server — which itself often
+// consumes the generic PORT env. Only in production (a single-port deploy) do we
+// honour the host-injected PORT so the app boots on Render / Railway / Fly / etc.
+export const PORT = IS_PROD
+  ? Number(process.env.PORT ?? process.env.SERVER_PORT ?? 8080)
+  : Number(process.env.SERVER_PORT ?? 5174);
 export const HOST = process.env.HOST ?? '0.0.0.0';
+
+// ---- Authentication (single-user private deployment) ----
+// When AUTH_USERNAME and AUTH_PASSWORD are both set, the whole API (and the
+// uploaded images) sit behind a login wall — this is what makes a public
+// deployment "only for you". Leave them unset locally and the app stays open
+// (no login), preserving the frictionless local-first experience.
+export const AUTH_USERNAME = (process.env.AUTH_USERNAME ?? '').trim();
+export const AUTH_PASSWORD = process.env.AUTH_PASSWORD ?? '';
+// Secret used to sign the session cookie. If omitted while auth is enabled we
+// derive a stable key from the credentials so sessions still survive restarts.
+export const SESSION_SECRET = process.env.SESSION_SECRET ?? '';
 // The Vite frontend port — only used for the startup banner so the printed
 // URLs match. Keep in sync with client/vite.config.ts (default 3000).
 export const CLIENT_PORT = Number(process.env.CLIENT_PORT ?? 3000);

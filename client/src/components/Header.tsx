@@ -3,6 +3,7 @@ import { useStore } from '../lib/store';
 import { useEditorUi } from '../lib/editorUi';
 import { Icon } from '../lib/icons';
 import { THEMES } from '../lib/themes';
+import { useSession } from '../lib/session';
 
 export function Header() {
   const { view, theme, chapterId, pageId, pages, focus, chatOpen } = useStore();
@@ -11,6 +12,7 @@ export function Header() {
   const toggleChat = useStore((s) => s.toggleChat);
   const openSearch = useStore((s) => s.openSearch);
   const saving = useEditorUi((s) => s.saving);
+  const { authRequired, logout } = useSession();
   const [themeOpen, setThemeOpen] = useState(false);
   const themeRef = useRef<HTMLDivElement | null>(null);
 
@@ -190,6 +192,11 @@ export function Header() {
           <Icon.Chat size={14} />
           Co-writer
         </button>
+        {authRequired && (
+          <button onClick={logout} title="Sign out" style={btn}>
+            <Icon.Exit size={16} />
+          </button>
+        )}
       </div>
     </header>
   );
