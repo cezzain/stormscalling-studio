@@ -114,13 +114,33 @@ export const requireAuth: RequestHandler = (req: Request, res: Response, next: N
 };
 
 // ---- brute-force throttle: per-IP failed-attempt backoff ------------------
-const attempts = new Map<string, { count: number; until: number }>();
+// Entries carry an expiry so the Map stays bounded even under an IP-spoofing
+// flood (no unbounded growth / OOM); a hard size cap is the final backstop.
+const attempts = new Map<string, { count: number; until: number; exp: number }>();
 const MAX_ATTEMPTS = 8;
-const LOCK_MS = 15 * 60 * 1000; // 15 min lockout after too many failures
+const LOCK_MS = 15 * 60 * 1000;   // lockout window after too many failures
+const ATTEMPT_TTL_MS = LOCK_MS;   // forget an IP after this much inactivity
+const MAX_TRACKED_IPS = 10_000;   // backstop against memory exhaustion
+const FAIL_DELAY_MS = 400;        // slow every failed guess (anti-brute-force)
 
+/** Behind Fly the true client IP is in `Fly-Client-IP` (the edge overwrites it,
+ *  so it can't be forged); elsewhere fall back to Express's req.ip. */
 function clientIp(req: Request): string {
+  const fly = req.headers['fly-client-ip'];
+  if (typeof fly === 'string' && fly) return fly;
   return (req.ip || req.socket.remoteAddress || 'unknown').toString();
 }
+
+/** Drop expired entries; if still over the cap, clear all (degrade throttling
+ *  rather than leak memory — the strong password is the real line of defence). */
+function sweepAttempts(now: number) {
+  for (const [ip, rec] of attempts) {
+    if (rec.exp <= now && rec.until <= now) attempts.delete(ip);
+  }
+  if (attempts.size > MAX_TRACKED_IPS) attempts.clear();
+}
+
+const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 // ---- routes ---------------------------------------------------------------
 export const authRouter = Router();
@@ -130,22 +150,33 @@ authRouter.get('/status', (req, res) => {
   res.json({ authRequired: authEnabled(), authed: isAuthed(req) });
 });
 
-authRouter.post('/login', (req, res) => {
+authRouter.post('/login', async (req, res) => {
   if (!authEnabled()) return res.json({ ok: true }); // no-op when auth is off
+  const now = Date.now();
   const ip = clientIp(req);
+  sweepAttempts(now);
+
   const rec = attempts.get(ip);
-  if (rec && rec.until > Date.now()) {
-    const mins = Math.ceil((rec.until - Date.now()) / 60000);
+  if (rec && rec.until > now) {
+    const mins = Math.ceil((rec.until - now) / 60000);
     return res.status(429).json({ error: `Too many attempts. Try again in ${mins} min.` });
   }
 
   const username = String(req.body?.username ?? '');
   const password = String(req.body?.password ?? '');
-  const ok = safeEqual(username, AUTH_USERNAME) && safeEqual(password, AUTH_PASSWORD);
+  // Evaluate BOTH comparisons (no &&-short-circuit) so response timing can't
+  // reveal whether it was the username or the password that was wrong.
+  const userOk = safeEqual(username, AUTH_USERNAME);
+  const passOk = safeEqual(password, AUTH_PASSWORD);
 
-  if (!ok) {
+  if (!(userOk && passOk)) {
     const count = (rec?.count ?? 0) + 1;
-    attempts.set(ip, { count, until: count >= MAX_ATTEMPTS ? Date.now() + LOCK_MS : 0 });
+    attempts.set(ip, {
+      count,
+      until: count >= MAX_ATTEMPTS ? now + LOCK_MS : 0,
+      exp: now + ATTEMPT_TTL_MS,
+    });
+    await delay(FAIL_DELAY_MS); // throttle online guessing
     return res.status(401).json({ error: 'Incorrect username or password.' });
   }
 

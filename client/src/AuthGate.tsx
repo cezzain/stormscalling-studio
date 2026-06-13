@@ -34,10 +34,13 @@ export function AuthGate() {
   }, [check]);
 
   useEffect(() => {
-    const onUnauth = () => setPhase((p) => (authRequired ? 'login' : p));
+    // A 401 is only ever emitted when auth is enforced server-side, so route to
+    // the login screen unconditionally — even if the initial status probe failed
+    // open, this guarantees the user lands on login rather than a broken shell.
+    const onUnauth = () => setPhase('login');
     window.addEventListener('scs:unauthorized', onUnauth);
     return () => window.removeEventListener('scs:unauthorized', onUnauth);
-  }, [authRequired]);
+  }, []);
 
   const logout = useCallback(async () => {
     try {

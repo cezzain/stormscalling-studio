@@ -180,6 +180,10 @@ export function streamChat(
         body: JSON.stringify(body),
         signal: controller.signal,
       });
+      if (res.status === 401) {
+        if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('scs:unauthorized'));
+        throw new Error('401 unauthorized');
+      }
       if (!res.body) throw new Error('no stream');
       const reader = res.body.getReader();
       const decoder = new TextDecoder();

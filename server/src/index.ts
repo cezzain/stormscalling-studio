@@ -3,7 +3,7 @@ import cors from 'cors';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { PORT, HOST, CLIENT_PORT, IMAGES_DIR, PROJECT_ROOT } from './config.js';
+import { PORT, HOST, CLIENT_PORT, IMAGES_DIR, PROJECT_ROOT, SESSION_SECRET } from './config.js';
 import './db.js'; // open DB + run schema + seed on boot
 import { aiStatus } from './providers/index.js';
 import { authRouter, requireAuth, authEnabled } from './auth.js';
@@ -99,6 +99,10 @@ app.listen(PORT, HOST, () => {
   console.log(`  Model:         ${ai.model}`);
   console.log(`  API key:       ${ai.hasKey ? 'detected ✓' : `MISSING for ${ai.provider} — co-writer disabled (editor still works)`}`);
   console.log(`  Login:         ${authEnabled() ? 'ENABLED — username + password required ✓' : 'open (no login) — set AUTH_USERNAME + AUTH_PASSWORD to lock it down'}`);
+  if (authEnabled() && !SESSION_SECRET) {
+    console.log('  ⚠ SESSION_SECRET not set — the cookie signing key is derived from your password.');
+    console.log('    For best security set SESSION_SECRET (e.g. `openssl rand -hex 32`).');
+  }
   console.log('');
   console.log('  Frontend dev server (run together via `npm run dev`):');
   console.log(`    Local:   http://localhost:${CLIENT_PORT}`);
