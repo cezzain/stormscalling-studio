@@ -2,61 +2,36 @@ import { useState } from 'react';
 import { useStore } from '../../lib/store';
 import { api } from '../../lib/api';
 import { Icon } from '../../lib/icons';
+import { type Volume, getVolumes, addVolume, removeVolume } from '../../lib/volumes';
 import type { Entity, EntityType } from '../../lib/types';
-
-interface Shelf {
-  id: string;
-  label: string;
-  subtitle: string;
-  types: EntityType[];
-  primary: EntityType; // the type created by this shelf's "+ New"
-  cover: string; // CSS background for the book cover
-}
-
-// Three tomes on the shelf. Together their types cover the whole codex.
-const SHELVES: Shelf[] = [
-  {
-    id: 'characters',
-    label: 'Characters',
-    subtitle: 'The people of your world',
-    types: ['character'],
-    primary: 'character',
-    cover: 'linear-gradient(145deg, var(--clay), var(--clay-2))',
-  },
-  {
-    id: 'places',
-    label: 'Places',
-    subtitle: 'Nations & locations',
-    types: ['nation', 'location'],
-    primary: 'location',
-    cover: 'linear-gradient(145deg, var(--forest), var(--forest-2))',
-  },
-  {
-    id: 'lore',
-    label: 'Factions & Lore',
-    subtitle: 'Factions & concepts',
-    types: ['faction', 'concept'],
-    primary: 'faction',
-    cover: 'linear-gradient(145deg, var(--sage), var(--tan))',
-  },
-];
 
 export function Bookshelf() {
   const entities = useStore((s) => s.entities);
   const selectEntity = useStore((s) => s.selectEntity);
   const refreshEntities = useStore((s) => s.refreshEntities);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [volumes, setVolumes] = useState<Volume[]>(getVolumes);
 
-  const countFor = (shelf: Shelf) => entities.filter((e) => shelf.types.includes(e.type)).length;
+  const countFor = (vol: Volume) => entities.filter((e) => vol.types.includes(e.type)).length;
 
-  const addTo = async (shelf: Shelf) => {
-    const e = await api.entities.create({ type: shelf.primary, name: `New ${shelf.primary}` });
+  const addTo = async (vol: Volume) => {
+    const e = await api.entities.create({ type: vol.primary as EntityType, name: `New ${vol.primary}` });
     await refreshEntities();
     selectEntity(e.id);
   };
 
+  const createVolume = () => {
+    const name = window.prompt('Name your new volume (e.g. Magic, Beasts, Religions)');
+    if (name && name.trim()) setVolumes(addVolume(name));
+  };
+  const deleteVolume = (vol: Volume) => {
+    if (countFor(vol) > 0) return; // only empty custom volumes can be removed
+    setVolumes(removeVolume(vol.id));
+    setOpenId(null);
+  };
+
   if (openId) {
-    const shelf = SHELVES.find((s) => s.id === openId)!;
+    const shelf = volumes.find((s) => s.id === openId)!;
     const items = entities.filter((e) => shelf.types.includes(e.type));
     return (
       <div style={{ height: '100%', overflowY: 'auto', padding: '34px 30px 90px' }}>
@@ -96,7 +71,12 @@ export function Bookshelf() {
             {/* entries revealed by the opened book */}
             <div style={{ flex: 1, minWidth: 0, animation: 'fadeup .5s .25s both' }}>
               <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 34, margin: '2px 0 2px', color: 'var(--ink)' }}>{shelf.label}</h1>
-              <div style={{ fontSize: 12.5, color: 'var(--ink-3)', marginBottom: 20 }}>{items.length} {items.length === 1 ? 'entry' : 'entries'}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                <span style={{ fontSize: 12.5, color: 'var(--ink-3)' }}>{items.length} {items.length === 1 ? 'entry' : 'entries'}</span>
+                {shelf.custom && items.length === 0 && (
+                  <span onClick={() => deleteVolume(shelf)} style={{ fontSize: 12, color: 'var(--danger)', cursor: 'pointer' }}>Delete volume</span>
+                )}
+              </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(168px, 1fr))', gap: 13 }}>
                 {items.map((e) => (
@@ -128,14 +108,26 @@ export function Bookshelf() {
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink-3)', marginTop: 6 }}>Choose a volume to open.</p>
       </div>
 
-      <div style={{ display: 'flex', gap: 20, alignItems: 'center', justifyContent: 'center' }}>
-        {SHELVES.map((shelf, i) => (
-          <BookSpine key={shelf.id} shelf={shelf} count={countFor(shelf)} delay={i * 0.08} onOpen={() => setOpenId(shelf.id)} />
+      <div style={{ display: 'flex', gap: 20, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+        {volumes.map((vol, i) => (
+          <BookSpine key={vol.id} shelf={vol} count={countFor(vol)} delay={i * 0.08} onOpen={() => setOpenId(vol.id)} />
         ))}
+        {/* add a new volume */}
+        <div
+          onClick={createVolume}
+          title="Add a volume"
+          style={{
+            width: DEPTH + 26, height: BOOK_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7,
+            border: '1.5px dashed var(--line-2)', borderRadius: 10, color: 'var(--ink-3)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 11, textAlign: 'center',
+          }}
+        >
+          <Icon.Plus size={18} />
+          Add<br />volume
+        </div>
       </div>
 
       {/* the shelf plank */}
-      <div style={{ width: 460, maxWidth: '82%', height: 14, marginTop: 6, borderRadius: '3px', background: 'linear-gradient(var(--tan), var(--ink-3))', opacity: 0.5, boxShadow: '0 14px 26px rgba(0,0,0,.18)' }} />
+      <div style={{ width: 560, maxWidth: '86%', height: 14, marginTop: 6, borderRadius: '3px', background: 'linear-gradient(var(--tan), var(--ink-3))', opacity: 0.5, boxShadow: '0 14px 26px rgba(0,0,0,.18)' }} />
     </div>
   );
 }
@@ -146,7 +138,7 @@ const DEPTH = 46;
 
 // A 3D book standing spine-out on the shelf. At rest you see the spine; on
 // hover it swings a little to reveal the cover; clicking opens it fully.
-function BookSpine({ shelf, count, delay, onOpen }: { shelf: Shelf; count: number; delay: number; onOpen: () => void }) {
+function BookSpine({ shelf, count, delay, onOpen }: { shelf: Volume; count: number; delay: number; onOpen: () => void }) {
   const [hover, setHover] = useState(false);
   // rotateY: 76° ≈ spine to camera, 26° ≈ cover cracked open toward viewer.
   const rot = hover ? 26 : 76;

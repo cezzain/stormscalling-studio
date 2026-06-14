@@ -419,7 +419,10 @@ export function Sidebar() {
             style={{ marginTop: 14 }}
           />
           {codexGroups.map((g) => {
-            const items = entities.filter((e) => g.types.includes(e.type));
+            // "World" is a catch-all so custom-volume entity types still appear.
+            const items = g.id === 'codexWorld'
+              ? entities.filter((e) => e.type !== 'character')
+              : entities.filter((e) => g.types.includes(e.type));
             const open = expanded[g.id] ?? true;
             return (
               <div key={g.id}>
