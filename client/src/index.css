@@ -99,6 +99,73 @@ button { font-family: inherit; }
   backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(145%);
 }
 
+/* Liquid-glass buttons & form controls — reusable across the app. */
+.glass-btn {
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%) brightness(1.05);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%) brightness(1.05);
+  background: color-mix(in srgb, var(--glass-2) calc(var(--glass-tint, 58) * 1%), transparent);
+  border: 1px solid rgba(255, 255, 255, calc(var(--glass-sheen-strength, 0.7) * 0.5));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-sheen-strength, 0.7) * 0.8)),
+    0 3px 12px rgba(43, 45, 34, .12);
+  color: var(--ink);
+  transition: transform .16s var(--spring, ease), box-shadow .18s ease, background .18s ease;
+}
+.glass-btn:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .85),
+    0 8px 22px rgba(43, 45, 34, .18);
+}
+.glass-btn:active { transform: translateY(1px) scale(0.985); }
+/* accent variant — clay-tinted glass for primary actions */
+.glass-btn--accent {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--clay) 32%, transparent), color-mix(in srgb, var(--clay) 16%, transparent));
+  color: var(--clay);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Liquid-glass range sliders — frosted pill track + glossy clay thumb. */
+input[type='range'].glass-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 24px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type='range'].glass-range::-webkit-slider-runnable-track {
+  height: 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--glass-2) 72%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 1px 3px rgba(43, 45, 34, .14), inset 0 1px 0 rgba(255, 255, 255, .55);
+}
+input[type='range'].glass-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -6px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, var(--clay), var(--clay-2));
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 2px 8px color-mix(in srgb, var(--clay) 42%, transparent);
+}
+input[type='range'].glass-range::-moz-range-track {
+  height: 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--glass-2) 72%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 1px 3px rgba(43, 45, 34, .14);
+}
+input[type='range'].glass-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: linear-gradient(160deg, var(--clay), var(--clay-2));
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 2px 8px color-mix(in srgb, var(--clay) 42%, transparent);
+}
+
 /* Header, sidebar, and chat panel frost automatically (their bg tokens are
    already translucent — this just adds the blur + a glassy hairline). */
 header,

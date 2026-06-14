@@ -126,7 +126,7 @@ export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
 
       {/* font (manuscript column) */}
       <div style={{ position: 'relative' }}>
-        <button onClick={() => { setFontOpen((o) => !o); setSizeOpen(false); }} style={pillBtn('var(--font-body)')}>
+        <button className="glass-btn" onClick={() => { setFontOpen((o) => !o); setSizeOpen(false); }} style={pillBtn('var(--font-body)')}>
           {font}
           <Icon.Chevron size={11} />
         </button>
@@ -141,7 +141,7 @@ export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
 
       {/* size */}
       <div style={{ position: 'relative' }}>
-        <button onClick={() => { setSizeOpen((o) => !o); setFontOpen(false); }} style={pillBtn()}>
+        <button className="glass-btn" onClick={() => { setSizeOpen((o) => !o); setFontOpen(false); }} style={pillBtn()}>
           {size}
           <Icon.Chevron size={11} />
         </button>
@@ -157,6 +157,7 @@ export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
       <div style={divider} />
 
       <button
+        className="glass-btn"
         onClick={onContinuity}
         style={{ ...pillBtn('var(--font-ui)'), color: 'var(--clay)', fontWeight: 500, fontSize: 12 }}
       >

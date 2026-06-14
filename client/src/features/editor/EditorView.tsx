@@ -26,7 +26,7 @@ const STATUS_LABEL: Record<SceneStatus, string> = { draft: 'Draft', revised: 'Re
 const FONT_VAR: Record<string, string> = { Lora: 'var(--font-body)', 'IM Fell English': 'var(--font-display)', Inter: 'var(--font-ui)' };
 
 export function EditorView() {
-  const { pages, pageId, chapterId, focus, settings } = useStore();
+  const { pages, pageId, chapterId, focus, settings, view } = useStore();
   const createPage = useStore((s) => s.createPage);
   const hasKey = useStore((s) => s.hasKey);
   const diff = useEditorUi((s) => s.diff);
@@ -123,9 +123,12 @@ export function EditorView() {
     }
   };
 
+  // New pages stay in whatever section we're viewing — a page added from the
+  // Lore tab lands under the LORE dropdown, not in the manuscript.
+  const section = view === 'lore' ? 'lore' : 'manuscript';
   const addPage = async () => {
     if (!container) return;
-    const np = await createPage({ parent_id: container.id, kind: 'page', title: 'Untitled page' });
+    const np = await createPage({ parent_id: container.id, kind: 'page', title: 'Untitled page', section: container.section ?? section });
     useStore.setState({ pageId: np.id });
   };
 
@@ -199,18 +202,19 @@ export function EditorView() {
                 </div>
               ))}
 
-              <div
+              <button
                 onClick={addPage}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, height: 56, border: '1.5px dashed rgba(255,255,255,0.25)', borderRadius: 6, color: 'rgba(255,255,255,0.45)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 13, fontWeight: 500, marginBottom: 24 }}
+                className="glass-btn"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, width: '100%', height: 56, borderRadius: 999, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 13, fontWeight: 500, marginBottom: 24 }}
               >
                 <Icon.Plus size={16} />
-                Add a page to this chapter
-              </div>
+                Add a {section === 'lore' ? 'lore page' : 'page'}
+              </button>
 
               <ContinuityPanel />
             </>
           ) : (
-            <EmptyState />
+            <EmptyState section={section} />
           )}
         </div>
       </div>
@@ -223,22 +227,24 @@ export function EditorView() {
   );
 }
 
-function EmptyState() {
+function EmptyState({ section }: { section: 'manuscript' | 'lore' }) {
   const createPage = useStore((s) => s.createPage);
+  const where = section === 'lore' ? 'lore page' : 'page';
   return (
     <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--ink-3)' }}>
       <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 32, color: 'var(--ink)', marginBottom: 10 }}>A blank page</h1>
       <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, maxWidth: 460, margin: '0 auto 22px' }}>
-        Nothing is selected yet. Create your first book, chapter, or page in the sidebar — or start one here.
+        Nothing is selected yet. Create your first book, chapter, or {where} in the sidebar — or start one here.
       </p>
       <button
         onClick={async () => {
-          const p = await createPage({ parent_id: null, kind: 'page', title: 'Untitled page' });
+          const p = await createPage({ parent_id: null, kind: 'page', title: 'Untitled page', section });
           useStore.getState().selectPage(p.id);
         }}
-        style={{ height: 38, padding: '0 18px', border: '1px solid var(--forest)', background: 'var(--forest)', color: '#EFE7D6', borderRadius: 9, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+        className="glass-btn glass-btn--accent"
+        style={{ height: 38, padding: '0 18px', borderRadius: 999, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
       >
-        New page
+        New {where}
       </button>
     </div>
   );

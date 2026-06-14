@@ -188,7 +188,7 @@ export function SettingsView() {
             </select>
           </Row>
           <Row label="Restore defaults" hint="Reset every appearance slider">
-            <button onClick={resetAppear} style={btnStyle}>Reset</button>
+            <button onClick={resetAppear} className="glass-btn" style={btnStyle}>Reset</button>
           </Row>
         </Section>
 
@@ -209,10 +209,10 @@ export function SettingsView() {
             <Value mono>./data/storms-calling.db</Value>
           </Row>
           <Row label="Backup" hint="Export everything (db + images) as a zip">
-            <button onClick={() => download(api.exportUrls.backup())} style={btnStyle}>Export →</button>
+            <button onClick={() => download(api.exportUrls.backup())} className="glass-btn" style={btnStyle}>Export →</button>
           </Row>
           <Row label="Codex" hint="Export all entries as a Markdown zip">
-            <button onClick={() => download(api.exportUrls.codex())} style={btnStyle}>Export →</button>
+            <button onClick={() => download(api.exportUrls.codex())} className="glass-btn" style={btnStyle}>Export →</button>
           </Row>
         </Section>
       </div>
@@ -249,9 +249,10 @@ function Slider({
     <Row label={label} hint={hint}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 230 }}>
         <input
+          className="glass-range"
           type="range" min={min} max={max} step={step} value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          style={{ flex: 1, accentColor: 'var(--clay)', cursor: 'pointer' }}
+          style={{ flex: 1 }}
         />
         <span style={{ fontSize: 12, color: 'var(--ink-2)', minWidth: 48, textAlign: 'right', fontFamily: 'ui-monospace,monospace' }}>{display}</span>
       </div>
@@ -263,6 +264,6 @@ function Value({ children, mono }: { children: React.ReactNode; mono?: boolean }
     <div style={{ fontSize: 12.5, color: 'var(--ink-2)', fontFamily: mono ? 'ui-monospace,monospace' : 'var(--font-ui)', padding: '6px 12px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--canvas)', minWidth: 120, textAlign: 'right' }}>{children}</div>
   );
 }
-const selStyle = (font = 'var(--font-ui)'): React.CSSProperties => ({ fontSize: 12.5, color: 'var(--ink-2)', fontFamily: font, padding: '6px 12px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--canvas)', minWidth: 140, outline: 'none', cursor: 'pointer' });
-const inStyle = (font = 'var(--font-ui)'): React.CSSProperties => ({ fontSize: 12.5, color: 'var(--ink-2)', fontFamily: font, padding: '6px 12px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--canvas)', minWidth: 200, textAlign: 'right', outline: 'none' });
-const btnStyle: React.CSSProperties = { fontSize: 12.5, color: 'var(--clay)', fontFamily: 'var(--font-ui)', fontWeight: 500, padding: '6px 14px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--canvas)', cursor: 'pointer' };
+const selStyle = (font = 'var(--font-ui)'): React.CSSProperties => ({ fontSize: 12.5, color: 'var(--ink-2)', fontFamily: font, padding: '7px 14px', borderRadius: 999, minWidth: 140, outline: 'none', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.4)', background: 'color-mix(in srgb, var(--canvas) 55%, transparent)' });
+const inStyle = (font = 'var(--font-ui)'): React.CSSProperties => ({ fontSize: 12.5, color: 'var(--ink-2)', fontFamily: font, padding: '7px 14px', borderRadius: 999, minWidth: 200, textAlign: 'right', outline: 'none', border: '1px solid rgba(255,255,255,0.4)', background: 'color-mix(in srgb, var(--canvas) 55%, transparent)' });
+const btnStyle: React.CSSProperties = { fontSize: 12.5, color: 'var(--clay)', fontFamily: 'var(--font-ui)', fontWeight: 600, padding: '7px 16px', borderRadius: 999, cursor: 'pointer' };
