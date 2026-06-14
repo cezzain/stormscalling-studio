@@ -252,7 +252,7 @@ function Slider({
           className="glass-range"
           type="range" min={min} max={max} step={step} value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          style={{ flex: 1 }}
+          style={{ flex: 1, ...( { '--pct': `${((value - min) / (max - min)) * 100}%` } as React.CSSProperties) }}
         />
         <span style={{ fontSize: 12, color: 'var(--ink-2)', minWidth: 48, textAlign: 'right', fontFamily: 'ui-monospace,monospace' }}>{display}</span>
       </div>

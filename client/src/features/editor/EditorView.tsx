@@ -28,6 +28,7 @@ const FONT_VAR: Record<string, string> = { Lora: 'var(--font-body)', 'IM Fell En
 export function EditorView() {
   const { pages, pageId, chapterId, focus, settings, view } = useStore();
   const createPage = useStore((s) => s.createPage);
+  const deletePage = useStore((s) => s.deletePage);
   const hasKey = useStore((s) => s.hasKey);
   const diff = useEditorUi((s) => s.diff);
   const setContinuity = useEditorUi((s) => s.setContinuity);
@@ -191,6 +192,21 @@ export function EditorView() {
                       transition: 'box-shadow 0.2s ease, outline 0.2s ease',
                     }}
                   >
+                    {/* delete this page */}
+                    <button
+                      className="glass-btn"
+                      title="Delete this page"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Delete "${pg.title}"${cards.length > 1 ? '' : ' (the only page here)'}? This cannot be undone.`)) {
+                          deletePage(pg.id);
+                        }
+                      }}
+                      style={{ position: 'absolute', top: 24, right: 24, display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px', borderRadius: 999, cursor: 'pointer', color: 'var(--danger)', fontFamily: 'var(--font-ui)', fontSize: 11.5, fontWeight: 600 }}
+                    >
+                      <Icon.Close size={13} />
+                      Delete
+                    </button>
                     <SceneEditor page={pg} focused={pg.id === pageId} autoFocus={pg.id === autoFocusId} />
                     {/* page footer */}
                     <div style={{ position: 'absolute', bottom: 36, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, pointerEvents: 'none' }}>

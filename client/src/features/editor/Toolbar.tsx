@@ -52,7 +52,8 @@ export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
     transition: 'background 0.18s var(--spring, ease), box-shadow 0.18s ease, color 0.15s ease',
     ...extra,
   });
-  const divider = { paddingRight: 7, marginRight: 4, borderRight: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 2 } as React.CSSProperties;
+  // Tool groups are separated by spacing alone — no divider lines / boxes.
+  const divider = { display: 'flex', alignItems: 'center', gap: 4 } as React.CSSProperties;
 
   const is = (name: string, attrs?: Record<string, unknown>) => (editor ? editor.isActive(name, attrs) : false);
 
@@ -72,8 +73,8 @@ export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 3,
-        padding: '6px 10px',
+        gap: 14,
+        padding: '7px 16px',
         borderRadius: 999,
         flexWrap: 'wrap',
         position: 'relative',

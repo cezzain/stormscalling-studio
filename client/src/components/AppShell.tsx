@@ -30,9 +30,9 @@ export function AppShell() {
 
   const canvasBg = focus ? (isDarkTheme(theme) ? 'rgba(10,13,10,0.6)' : 'rgba(222,212,194,0.5)') : 'transparent';
   const showChat = chatOpen && !focus;
-  // On compact (iPad-portrait-ish) widths the sidebar floats over the canvas;
-  // on wider screens it sits inline in the layout.
-  const showSidebar = !focus && (compact ? sidebarOpen : true);
+  // The sidebar honours the toggle at every width. On compact (iPad-portrait-ish)
+  // widths it floats over the canvas; on wider screens it sits inline.
+  const showSidebar = !focus && sidebarOpen;
 
   return (
     <div
