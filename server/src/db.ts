@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS pages (
   title       TEXT NOT NULL DEFAULT 'Untitled',
   body        TEXT NOT NULL DEFAULT '',      -- TipTap HTML (leaf nodes)
   status      TEXT,                          -- draft | revised | done (scenes)
+  section     TEXT NOT NULL DEFAULT 'manuscript', -- manuscript | lore (which tree the page lives in)
   pinned      INTEGER NOT NULL DEFAULT 0,    -- Lore Bible pin
   collapsed   INTEGER NOT NULL DEFAULT 0,
   word_count  INTEGER NOT NULL DEFAULT 0,
@@ -147,6 +148,19 @@ CREATE INDEX IF NOT EXISTS idx_versions_page ON versions(page_id, created_at);
 `;
 
 db.exec(SCHEMA);
+
+// ---------------------------------------------------------------------------
+// Lightweight migrations — for databases created before a column existed.
+// CREATE TABLE IF NOT EXISTS won't add new columns to an existing table, so
+// add them here, guarded by a PRAGMA check so re-runs are no-ops.
+// ---------------------------------------------------------------------------
+function hasColumn(table: string, column: string): boolean {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  return cols.some((c) => c.name === column);
+}
+if (!hasColumn('pages', 'section')) {
+  db.exec("ALTER TABLE pages ADD COLUMN section TEXT NOT NULL DEFAULT 'manuscript'");
+}
 
 // ---------------------------------------------------------------------------
 // First-launch seed — minimal, no fake worldbuilding data.

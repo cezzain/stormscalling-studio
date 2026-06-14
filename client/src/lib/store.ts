@@ -56,6 +56,7 @@ interface StoreState {
 
   selectPage: (pageId: string) => void;
   selectChapter: (chapterId: string) => void;
+  selectSection: (section: 'manuscript' | 'lore') => void;
   selectEntity: (entityId: string) => void;
 
   createPage: (data: Partial<Page>) => Promise<Page>;
@@ -122,8 +123,9 @@ export const useStore = create<StoreState>((set, get) => ({
       if (p.kind === 'book' || p.kind === 'part' || p.kind === 'folder') expanded[p.id] = true;
     }
 
-    // pick an initial page: first leaf page
-    const firstLeaf = pages.find((p) => p.kind === 'page') ?? pages[0];
+    // pick an initial page: first manuscript leaf (falls back to any page)
+    const manuscriptPages = pages.filter((p) => p.section !== 'lore');
+    const firstLeaf = manuscriptPages.find((p) => p.kind === 'page') ?? manuscriptPages[0] ?? pages[0];
     let chapterId: string | null = null;
     let pageId: string | null = null;
     if (firstLeaf) {
@@ -200,7 +202,7 @@ export const useStore = create<StoreState>((set, get) => ({
     if (!page) return;
     const chapterId = page.parent_id ?? page.id;
     set((s) => ({
-      view: 'editor',
+      view: page.section === 'lore' ? 'lore' : 'editor',
       pageId,
       chapterId,
       sessionStartWords: page.word_count,
@@ -209,15 +211,26 @@ export const useStore = create<StoreState>((set, get) => ({
   },
   selectChapter: (chapterId) => {
     const { pages, expanded } = get();
+    const chapter = pages.find((p) => p.id === chapterId);
     const children = pages.filter((p) => p.parent_id === chapterId).sort((a, b) => a.position - b.position);
     const firstPage = children.find((c) => c.kind === 'page') ?? children[0];
     set({
-      view: 'editor',
+      view: chapter?.section === 'lore' ? 'lore' : 'editor',
       chapterId,
       pageId: firstPage ? firstPage.id : null,
       expanded: { ...expanded, [chapterId]: true },
       sessionStartWords: firstPage?.word_count ?? 0,
     });
+  },
+  // Jump to a top-level section (manuscript | lore) from the nav, selecting its
+  // first available page so the editor isn't left showing the other section.
+  selectSection: (section) => {
+    const { pages } = get();
+    const view = section === 'lore' ? 'lore' : 'editor';
+    const inSection = pages.filter((p) => p.section === section);
+    const firstLeaf = inSection.find((p) => p.kind === 'page') ?? inSection[0];
+    if (firstLeaf) get().selectPage(firstLeaf.id);
+    else set({ view, chapterId: null, pageId: null });
   },
   selectEntity: (entityId) => set({ view: 'codex', entityId }),
 

@@ -46,7 +46,7 @@ export function AppShell() {
         {!focus && <Sidebar />}
 
         <main style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex', flexDirection: 'column', background: canvasBg, overflow: 'hidden' }}>
-          {view === 'editor' && <EditorView />}
+          {(view === 'editor' || view === 'lore') && <EditorView />}
           {view === 'codex' && <CodexView />}
           {view === 'timeline' && <TimelineView />}
           {view === 'map' && <MapView />}

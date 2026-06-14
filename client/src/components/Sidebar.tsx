@@ -12,6 +12,7 @@ const STATUS_COLOR: Record<SceneStatus, string> = {
 
 const NAV: Array<{ id: ReturnType<typeof Object.keys>[number]; label: string; icon: keyof typeof Icon }> = [
   { id: 'editor', label: 'Manuscript', icon: 'Manuscript' },
+  { id: 'lore', label: 'Lore', icon: 'Pin' },
   { id: 'codex', label: 'Codex', icon: 'Codex' },
   { id: 'timeline', label: 'Timeline', icon: 'Timeline' },
   { id: 'map', label: 'Map', icon: 'Map' },
@@ -71,8 +72,8 @@ export function Sidebar() {
     pages.filter((p) => p.parent_id === parent).sort((a, b) => a.position - b.position);
 
   // ---- tree actions ----
-  const addChild = async (parentId: string | null, kind: Page['kind'], title: string) => {
-    const page = await store.createPage({ parent_id: parentId, kind, title });
+  const addChild = async (parentId: string | null, kind: Page['kind'], title: string, section?: Page['section']) => {
+    const page = await store.createPage({ parent_id: parentId, kind, title, ...(section ? { section } : {}) });
     if (parentId) store.setExpanded(parentId, true);
     if (kind === 'page') store.selectPage(page.id);
     else store.selectChapter(page.id);
@@ -165,7 +166,8 @@ export function Sidebar() {
     const isLeaf = node.kind === 'page';
     const isContainer = !isLeaf;
     const open = expanded[node.id];
-    const active = (isLeaf && pageId === node.id && view === 'editor') || (node.kind === 'chapter' && chapterId === node.id && view === 'editor');
+    const nodeView = node.section === 'lore' ? 'lore' : 'editor';
+    const active = (isLeaf && pageId === node.id && view === nodeView) || (node.kind === 'chapter' && chapterId === node.id && view === nodeView);
     const pad = 8 + depth * 15;
 
     const onClick = () => {
@@ -278,7 +280,8 @@ export function Sidebar() {
     { id: 'codexWorld', label: 'World', types: ['nation', 'location', 'faction', 'concept'] },
   ];
 
-  const roots = childrenOf(null);
+  const manuscriptRoots = childrenOf(null).filter((p) => p.section !== 'lore');
+  const loreRoots = childrenOf(null).filter((p) => p.section === 'lore');
 
   return (
     <aside
@@ -336,7 +339,11 @@ export function Sidebar() {
             return (
               <button
                 key={n.id as string}
-                onClick={() => store.setView(n.id as any)}
+                onClick={() => {
+                  if (n.id === 'editor') store.selectSection('manuscript');
+                  else if (n.id === 'lore') store.selectSection('lore');
+                  else store.setView(n.id as any);
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -365,8 +372,18 @@ export function Sidebar() {
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '2px 8px 16px', minHeight: 0 }}>
           {/* MANUSCRIPT */}
-          <SectionHeader label="MANUSCRIPT" onAdd={() => addChild(null, 'page', 'Untitled page')} />
-          {roots.map((r) => renderNode(r, 0))}
+          <SectionHeader label="MANUSCRIPT" onAdd={() => addChild(null, 'page', 'Untitled page', 'manuscript')} />
+          {manuscriptRoots.map((r) => renderNode(r, 0))}
+
+          {/* LORE */}
+          <SectionHeader label="LORE" onAdd={() => addChild(null, 'page', 'New lore page', 'lore')} style={{ marginTop: 14 }} />
+          {loreRoots.length ? (
+            loreRoots.map((r) => renderNode(r, 0))
+          ) : (
+            <div style={{ padding: '4px 12px 6px', fontSize: 11.5, color: 'var(--ink-3)', lineHeight: 1.5 }}>
+              Build your world bible here — pages for environment, plot, magic, factions. Everything here is sent to the co-writer as canon.
+            </div>
+          )}
 
           {/* CODEX */}
           <SectionHeader

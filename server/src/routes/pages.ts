@@ -11,6 +11,7 @@ interface PageRow {
   title: string;
   body: string;
   status: string | null;
+  section: string;
   pinned: number;
   collapsed: number;
   word_count: number;
@@ -52,14 +53,23 @@ pagesRouter.post('/', (req, res) => {
   const { parent_id = null, kind = 'page', title = 'Untitled', status = null, body = '' } = req.body ?? {};
   const id = newId();
   const t = now();
+  // A child always belongs to its parent's section; a root uses the requested
+  // section (manuscript | lore), defaulting to manuscript.
+  let section = req.body?.section === 'lore' ? 'lore' : 'manuscript';
+  if (parent_id) {
+    const parent = db.prepare('SELECT section FROM pages WHERE id = ?').get(parent_id) as
+      | { section: string }
+      | undefined;
+    if (parent) section = parent.section;
+  }
   // place at end of siblings
   const maxPos = db
     .prepare('SELECT COALESCE(MAX(position), 0) AS m FROM pages WHERE parent_id IS ?')
     .get(parent_id) as { m: number };
   db.prepare(
-    `INSERT INTO pages (id, parent_id, kind, title, body, status, pinned, collapsed, word_count, position, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?)`,
-  ).run(id, parent_id, kind, title, body, status, wordCount(body), maxPos.m + 1, t, t);
+    `INSERT INTO pages (id, parent_id, kind, title, body, status, section, pinned, collapsed, word_count, position, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?)`,
+  ).run(id, parent_id, kind, title, body, status, section, wordCount(body), maxPos.m + 1, t, t);
   if (body) rebuildMentions(id, body);
   const row = db.prepare('SELECT * FROM pages WHERE id = ?').get(id) as PageRow;
   res.json({ ...row, pinned: !!row.pinned, collapsed: !!row.collapsed });

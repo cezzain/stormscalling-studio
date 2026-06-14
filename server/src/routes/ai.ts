@@ -76,7 +76,9 @@ function buildContext(opts: CtxOpts): { text: string; parts: Record<string, bool
   }
 
   if (opts.lore) {
-    const pinned = db.prepare('SELECT title, body FROM pages WHERE pinned = 1').all() as Array<{
+    const pinned = db
+      .prepare("SELECT title, body FROM pages WHERE section = 'lore' OR pinned = 1 ORDER BY position")
+      .all() as Array<{
       title: string;
       body: string;
     }>;

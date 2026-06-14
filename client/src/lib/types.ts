@@ -1,7 +1,8 @@
 export type PageKind = 'book' | 'part' | 'chapter' | 'page' | 'folder';
 export type SceneStatus = 'draft' | 'revised' | 'done';
 export type EntityType = 'character' | 'nation' | 'location' | 'faction' | 'concept';
-export type View = 'editor' | 'codex' | 'timeline' | 'map' | 'settings';
+export type View = 'editor' | 'lore' | 'codex' | 'timeline' | 'map' | 'settings';
+export type PageSection = 'manuscript' | 'lore';
 
 export interface Page {
   id: string;
@@ -10,6 +11,7 @@ export interface Page {
   title: string;
   body: string;
   status: SceneStatus | null;
+  section: PageSection;
   pinned: boolean;
   collapsed: boolean;
   word_count: number;
