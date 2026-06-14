@@ -40,9 +40,19 @@
   --font-display: 'IM Fell English', Georgia, serif;
   --font-body: 'Lora', Georgia, serif;
   --font-ui: 'Inter', -apple-system, system-ui, sans-serif;
+  /* ---- Word-like page view ---- */
+  --editor-desk: #BEBBB4;
+  --page-bg: #FDFCF9;
+  --page-shadow: 0 2px 4px rgba(43,45,34,.08), 0 8px 28px rgba(43,45,34,.13), 0 28px 72px rgba(43,45,34,.07);
+  --page-shadow-active: 0 2px 4px rgba(43,45,34,.10), 0 8px 32px rgba(43,45,34,.18), 0 32px 80px rgba(43,45,34,.09);
 }
 
 [data-theme="dark"] {
+  /* ---- Word-like page view (dark) ---- */
+  --editor-desk: #0C0F0C;
+  --page-bg: #1F2B1F;
+  --page-shadow: 0 2px 6px rgba(0,0,0,.50), 0 12px 36px rgba(0,0,0,.55), 0 32px 80px rgba(0,0,0,.35);
+  --page-shadow-active: 0 2px 6px rgba(0,0,0,.55), 0 14px 42px rgba(0,0,0,.65), 0 38px 88px rgba(0,0,0,.40);
   --canvas: #141A14;
   --surface: rgba(29, 36, 28, 0.58);
   --surface-2: rgba(40, 49, 42, 0.62);
@@ -84,6 +94,8 @@
 
 /* ---- Coral — warm peach + coral + rose ---- */
 [data-theme="coral"] {
+  --editor-desk: #C2B4B0;
+  --page-bg: #FFFEFB;
   --canvas: #F7E7DE;
   --surface: rgba(255, 241, 235, 0.66);
   --surface-2: rgba(255, 247, 243, 0.70);
@@ -113,6 +125,8 @@
 
 /* ---- Ocean — pale blue + teal + cyan ---- */
 [data-theme="ocean"] {
+  --editor-desk: #B4C2C9;
+  --page-bg: #F8FCFD;
   --canvas: #DCE7EC;
   --surface: rgba(235, 243, 246, 0.66);
   --surface-2: rgba(244, 249, 251, 0.70);
@@ -142,6 +156,8 @@
 
 /* ---- Plum — lavender + plum + magenta ---- */
 [data-theme="plum"] {
+  --editor-desk: #BCB4C4;
+  --page-bg: #FDFBFF;
   --canvas: #E8E0EC;
   --surface: rgba(243, 238, 247, 0.66);
   --surface-2: rgba(249, 245, 251, 0.70);
@@ -171,6 +187,8 @@
 
 /* ---- Sage Grove — soft greens ---- */
 [data-theme="sage"] {
+  --editor-desk: #B6BEB0;
+  --page-bg: #FAFDF7;
   --canvas: #E3E8D9;
   --surface: rgba(240, 244, 232, 0.66);
   --surface-2: rgba(247, 250, 241, 0.70);
@@ -200,6 +218,8 @@
 
 /* ---- Goldenrod — honey + amber ---- */
 [data-theme="gold"] {
+  --editor-desk: #C0B99A;
+  --page-bg: #FEFDF5;
   --canvas: #ECE3CC;
   --surface: rgba(247, 240, 224, 0.66);
   --surface-2: rgba(251, 246, 235, 0.70);
@@ -229,6 +249,8 @@
 
 /* ---- Rose Quartz — soft pink ---- */
 [data-theme="rose"] {
+  --editor-desk: #C0B0B8;
+  --page-bg: #FFFBFD;
   --canvas: #F0E0E5;
   --surface: rgba(250, 238, 242, 0.66);
   --surface-2: rgba(252, 245, 248, 0.70);
@@ -258,6 +280,8 @@
 
 /* ---- Slate — cool blue-grey ---- */
 [data-theme="slate"] {
+  --editor-desk: #B6BCC4;
+  --page-bg: #F9FAFC;
   --canvas: #DCE0E6;
   --surface: rgba(236, 239, 243, 0.66);
   --surface-2: rgba(245, 247, 250, 0.70);
@@ -287,6 +311,10 @@
 
 /* ---- Midnight Coral — dark, warm ---- */
 [data-theme="midnight"] {
+  --editor-desk: #0E0A0B;
+  --page-bg: #241B1D;
+  --page-shadow: 0 2px 6px rgba(0,0,0,.50), 0 12px 36px rgba(0,0,0,.55), 0 32px 80px rgba(0,0,0,.35);
+  --page-shadow-active: 0 2px 6px rgba(0,0,0,.55), 0 14px 42px rgba(0,0,0,.65), 0 38px 88px rgba(0,0,0,.40);
   --canvas: #1A1416;
   --surface: rgba(38, 28, 30, 0.58);
   --surface-2: rgba(50, 38, 40, 0.62);
@@ -321,6 +349,10 @@
 
 /* ---- Midnight Ocean — dark teal ---- */
 [data-theme="midnight-ocean"] {
+  --editor-desk: #080F12;
+  --page-bg: #162024;
+  --page-shadow: 0 2px 6px rgba(0,0,0,.50), 0 12px 36px rgba(0,0,0,.55), 0 32px 80px rgba(0,0,0,.35);
+  --page-shadow-active: 0 2px 6px rgba(0,0,0,.55), 0 14px 42px rgba(0,0,0,.65), 0 38px 88px rgba(0,0,0,.40);
   --canvas: #0F1A1D;
   --surface: rgba(24, 38, 42, 0.58);
   --surface-2: rgba(34, 50, 54, 0.62);
@@ -355,6 +387,10 @@
 
 /* ---- Midnight Plum — dark purple ---- */
 [data-theme="midnight-plum"] {
+  --editor-desk: #0E0A14;
+  --page-bg: #201828;
+  --page-shadow: 0 2px 6px rgba(0,0,0,.50), 0 12px 36px rgba(0,0,0,.55), 0 32px 80px rgba(0,0,0,.35);
+  --page-shadow-active: 0 2px 6px rgba(0,0,0,.55), 0 14px 42px rgba(0,0,0,.65), 0 38px 88px rgba(0,0,0,.40);
   --canvas: #16121C;
   --surface: rgba(34, 28, 42, 0.58);
   --surface-2: rgba(46, 38, 56, 0.62);

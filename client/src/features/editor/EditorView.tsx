@@ -114,17 +114,18 @@ export function EditorView() {
           minHeight: 0,
           display: 'flex',
           justifyContent: 'center',
-          padding: '38px 28px 140px',
+          padding: '52px 40px 160px',
+          background: 'var(--editor-desk)',
           ...( { '--ms-font': fontVar, '--ms-size': sizeVar } as React.CSSProperties),
         }}
       >
         <div style={{ width: '100%', maxWidth: 'var(--ms-width, 880px)' }}>
           {container ? (
             <>
-              {/* chapter / page header */}
-              <div style={{ margin: '0 4px 28px' }}>
+              {/* chapter / page header — sits on the "desk" above the first page */}
+              <div style={{ margin: '0 4px 32px', padding: '0 8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1.4, color: 'var(--clay)', textTransform: 'uppercase' }}>{partLabel}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1.4, color: 'var(--clay)', textTransform: 'uppercase', opacity: 0.85 }}>{partLabel}</span>
                   {status && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12, fontWeight: 600, color: STATUS_COLOR[status], flex: '0 0 auto' }}>
                       <span style={{ width: 8, height: 8, borderRadius: '50%', background: STATUS_COLOR[status] }} />
@@ -132,42 +133,44 @@ export function EditorView() {
                     </span>
                   )}
                 </div>
-                <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 46, lineHeight: 1.08, margin: '10px 0 0', color: 'var(--ink)' }}>{container.title}</h1>
-                <div style={{ marginTop: 12, fontSize: 12.5, color: 'var(--ink-3)' }}>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 44, lineHeight: 1.08, margin: '10px 0 0', color: 'var(--ink)', opacity: 0.88 }}>{container.title}</h1>
+                <div style={{ marginTop: 10, fontSize: 12, color: 'var(--ink-3)' }}>
                   {cards.length} page{cards.length === 1 ? '' : 's'} · {totalWords.toLocaleString()} words
                 </div>
               </div>
 
-              {/* page cards */}
+              {/* page cards — each looks like a physical sheet of paper */}
               {cards.map((pg, i) => (
-                <div key={pg.id} style={{ marginBottom: 30 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 8px 11px' }}>
-                    <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, color: 'var(--ink-3)', flex: '0 0 auto' }}>Page {i + 1}</span>
-                    <span style={{ height: 1, flex: 1, background: 'var(--line)' }} />
-                    <span style={{ fontFamily: 'var(--font-ui)', fontSize: 12.5, fontWeight: 600, color: 'var(--ink-2)' }}>{pg.title}</span>
-                    <span style={{ height: 1, width: 18, background: 'var(--line)' }} />
-                    <span style={{ fontSize: 11, color: 'var(--ink-3)', flex: '0 0 auto' }}>{(pg.word_count || 0).toLocaleString()} words</span>
-                  </div>
+                <div key={pg.id} style={{ marginBottom: 48 }}>
                   <div
-                    className="glass-soft"
                     onClick={() => useStore.setState({ pageId: pg.id })}
                     style={{
-                      background: 'var(--column)',
-                      border: `1px solid ${pg.id === pageId ? 'var(--clay)' : 'var(--line)'}`,
-                      borderRadius: 16,
-                      boxShadow: 'var(--shadow)',
-                      padding: '76px 88px',
-                      minHeight: 440,
+                      background: 'var(--page-bg)',
+                      border: 'none',
+                      borderRadius: 2,
+                      boxShadow: pg.id === pageId ? 'var(--page-shadow-active)' : 'var(--page-shadow)',
+                      padding: '96px 96px 112px',
+                      minHeight: 1056,
+                      position: 'relative',
+                      outline: pg.id === pageId ? '2px solid rgba(168,105,60,0.30)' : 'none',
+                      outlineOffset: 2,
+                      transition: 'box-shadow 0.2s ease, outline 0.2s ease',
                     }}
                   >
                     <SceneEditor page={pg} focused={pg.id === pageId} />
+                    {/* page footer */}
+                    <div style={{ position: 'absolute', bottom: 36, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, pointerEvents: 'none' }}>
+                      <span style={{ fontFamily: 'var(--font-ui)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: 0.3 }}>{pg.title}</span>
+                      <span style={{ fontSize: 10, color: 'var(--ink-3)', opacity: 0.6 }}>·</span>
+                      <span style={{ fontFamily: 'var(--font-ui)', fontSize: 11, color: 'var(--ink-3)' }}>{i + 1}</span>
+                    </div>
                   </div>
                 </div>
               ))}
 
               <div
                 onClick={addPage}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, height: 66, border: '1.5px dashed var(--line-2)', borderRadius: 14, color: 'var(--ink-3)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 13, fontWeight: 500 }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, height: 56, border: '1.5px dashed rgba(255,255,255,0.25)', borderRadius: 6, color: 'rgba(255,255,255,0.45)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 13, fontWeight: 500, marginBottom: 24 }}
               >
                 <Icon.Plus size={16} />
                 Add a page to this chapter
