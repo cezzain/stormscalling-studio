@@ -52,6 +52,7 @@ export const api = {
     list: () => j<Page[]>('/pages'),
     get: (id: string) => j<Page>(`/pages/${id}`),
     create: (data: Partial<Page>) => j<Page>('/pages', { method: 'POST', body: JSON.stringify(data) }),
+    duplicate: (id: string) => j<Page>(`/pages/${id}/duplicate`, { method: 'POST' }),
     update: (id: string, data: Partial<Page>) => j<Page>(`/pages/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     move: (id: string, parent_id: string | null, position: number) =>
       j(`/pages/${id}/move`, { method: 'POST', body: JSON.stringify({ parent_id, position }) }),

@@ -493,6 +493,7 @@ export function Sidebar() {
           }}
           onAddPage={() => addChild(menu.node.kind === 'page' ? menu.node.parent_id : menu.node.id, 'page', 'Untitled page')}
           onAddChapter={() => addChild(menu.node.kind === 'page' ? menu.node.parent_id : menu.node.id, 'chapter', 'New chapter')}
+          onDuplicate={() => { store.duplicatePage(menu.node.id); setMenu(null); }}
           onStatus={(s) => setStatus(menu.node.id, s)}
           onPin={() => togglePin(menu.node)}
           onDelete={() => remove(menu.node)}
@@ -537,6 +538,7 @@ function ContextMenu({
   onRename,
   onAddPage,
   onAddChapter,
+  onDuplicate,
   onStatus,
   onPin,
   onDelete,
@@ -545,6 +547,7 @@ function ContextMenu({
   onRename: () => void;
   onAddPage: () => void;
   onAddChapter: () => void;
+  onDuplicate: () => void;
   onStatus: (s: SceneStatus | null) => void;
   onPin: () => void;
   onDelete: () => void;
@@ -587,6 +590,9 @@ function ContextMenu({
           New chapter inside
         </div>
       )}
+      <div style={item} onClick={onDuplicate}>
+        Duplicate <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>⌘D</span>
+      </div>
       <div style={{ height: 1, background: 'var(--line)', margin: '5px 6px' }} />
       <div style={{ padding: '4px 12px 2px', fontSize: 10, letterSpacing: 1, color: 'var(--ink-3)', fontWeight: 600 }}>STATUS</div>
       {(['draft', 'revised', 'done'] as SceneStatus[]).map((s) => (

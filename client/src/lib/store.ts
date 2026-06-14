@@ -30,6 +30,9 @@ interface StoreState {
   pageId: string | null; // focused leaf page
   entityId: string | null; // codex selection
 
+  // page clipboard (sidebar copy / cut / paste)
+  pageClipboard: { id: string; mode: 'copy' | 'cut' } | null;
+
   // chat context toggles
   ctx: ContextToggles;
 
@@ -60,6 +63,10 @@ interface StoreState {
   selectEntity: (entityId: string) => void;
 
   createPage: (data: Partial<Page>) => Promise<Page>;
+  duplicatePage: (id: string) => Promise<Page>;
+  copyPage: (id: string) => void;
+  cutPage: (id: string) => void;
+  pastePage: (targetId: string) => Promise<void>;
   updatePageLocal: (id: string, patch: Partial<Page>) => void;
   savePage: (id: string, patch: Partial<Page>) => Promise<void>;
   deletePage: (id: string) => Promise<void>;
@@ -92,6 +99,7 @@ export const useStore = create<StoreState>((set, get) => ({
   chapterId: null,
   pageId: null,
   entityId: null,
+  pageClipboard: null,
   ctx: { scene: true, chapter: false, codex: false, lore: true },
   sessionStartWords: 0,
 
@@ -238,6 +246,46 @@ export const useStore = create<StoreState>((set, get) => ({
     const page = await api.pages.create(data);
     set((s) => ({ pages: [...s.pages, page] }));
     return page;
+  },
+  duplicatePage: async (id) => {
+    const copy = await api.pages.duplicate(id);
+    await get().refreshPages();
+    get().selectPage(copy.id);
+    return copy;
+  },
+  copyPage: (id) => set({ pageClipboard: { id, mode: 'copy' } }),
+  cutPage: (id) => set({ pageClipboard: { id, mode: 'cut' } }),
+  pastePage: async (targetId) => {
+    const { pageClipboard, pages } = get();
+    if (!pageClipboard) return;
+    const target = pages.find((p) => p.id === targetId);
+    if (!target) return;
+    // Paste inside the target if it's a container, otherwise beside it (same parent).
+    const destParent = target.kind !== 'page' ? target.id : target.parent_id;
+    // A large position value drops it at the end of the destination container.
+    const endPos = Date.now();
+
+    if (pageClipboard.mode === 'copy') {
+      const copy = await api.pages.duplicate(pageClipboard.id);
+      if ((copy.parent_id ?? null) !== (destParent ?? null)) {
+        await api.pages.move(copy.id, destParent ?? null, endPos);
+      }
+      await get().refreshPages();
+      if (destParent) get().setExpanded(destParent, true);
+      get().selectPage(copy.id);
+    } else {
+      // Cut + paste = move. Guard against dropping a node into its own subtree.
+      let a: string | null = destParent;
+      while (a) {
+        if (a === pageClipboard.id) return;
+        a = pages.find((p) => p.id === a)?.parent_id ?? null;
+      }
+      await api.pages.move(pageClipboard.id, destParent ?? null, endPos);
+      await get().refreshPages();
+      if (destParent) get().setExpanded(destParent, true);
+      get().selectPage(pageClipboard.id);
+      set({ pageClipboard: null });
+    }
   },
   updatePageLocal: (id, patch) =>
     set((s) => ({ pages: s.pages.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),

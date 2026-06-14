@@ -98,6 +98,35 @@ pagesRouter.patch('/:id', (req, res) => {
   res.json({ ...row, pinned: !!row.pinned, collapsed: !!row.collapsed });
 });
 
+// ---- duplicate (deep-copies the page and all its descendants) ----
+pagesRouter.post('/:id/duplicate', (req, res) => {
+  const src = db.prepare('SELECT * FROM pages WHERE id = ?').get(req.params.id) as PageRow | undefined;
+  if (!src) return res.status(404).json({ error: 'not_found' });
+  const t = now();
+  const childrenStmt = db.prepare('SELECT * FROM pages WHERE parent_id = ? ORDER BY position');
+  const insert = db.prepare(
+    `INSERT INTO pages (id, parent_id, kind, title, body, status, section, pinned, collapsed, word_count, position, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?)`,
+  );
+  let newRootId = '';
+  const copyNode = (node: PageRow, parentId: string | null, position: number, isRoot: boolean) => {
+    const id = newId();
+    if (isRoot) newRootId = id;
+    const title = isRoot ? `${node.title} (copy)` : node.title;
+    insert.run(id, parentId, node.kind, title, node.body, node.status, node.section, node.pinned, node.word_count, position, t, t);
+    if (node.body) rebuildMentions(id, node.body);
+    const kids = childrenStmt.all(node.id) as PageRow[];
+    kids.forEach((k, i) => copyNode(k, id, i, false));
+  };
+  // place the copy right after the source among its siblings
+  const maxPos = db
+    .prepare('SELECT COALESCE(MAX(position), 0) AS m FROM pages WHERE parent_id IS ?')
+    .get(src.parent_id) as { m: number };
+  db.transaction(() => copyNode(src, src.parent_id, maxPos.m + 1, true))();
+  const row = db.prepare('SELECT * FROM pages WHERE id = ?').get(newRootId) as PageRow;
+  res.json({ ...row, pinned: !!row.pinned, collapsed: !!row.collapsed });
+});
+
 // ---- move / reorder (set parent + position) ----
 pagesRouter.post('/:id/move', (req, res) => {
   const { parent_id = null, position } = req.body ?? {};

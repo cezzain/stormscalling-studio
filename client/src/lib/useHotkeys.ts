@@ -4,10 +4,50 @@ import { useStore } from './store';
 /** Global keyboard map (mockup + PRD cross-cutting requirements). */
 export function useHotkeys() {
   useEffect(() => {
+    // True when the user is typing in a text field / the manuscript editor, so
+    // we never hijack Delete / Ctrl+C/X/V/D away from normal text editing.
+    const isTyping = () => {
+      const el = document.activeElement as HTMLElement | null;
+      if (!el) return false;
+      const tag = el.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
+    };
+
     const handler = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
       const k = e.key.toLowerCase();
       const s = useStore.getState();
+
+      // ---- page tree shortcuts (only when not editing text, and a page is selected) ----
+      if (!isTyping()) {
+        const pid = s.pageId;
+        if ((e.key === 'Delete' || e.key === 'Backspace') && pid && !mod) {
+          e.preventDefault();
+          const page = s.pages.find((p) => p.id === pid);
+          if (page && confirm(`Delete "${page.title}" and everything inside it?`)) s.deletePage(pid);
+          return;
+        }
+        if (mod && k === 'd' && pid) {
+          e.preventDefault();
+          s.duplicatePage(pid);
+          return;
+        }
+        if (mod && k === 'c' && pid) {
+          e.preventDefault();
+          s.copyPage(pid);
+          return;
+        }
+        if (mod && k === 'x' && pid) {
+          e.preventDefault();
+          s.cutPage(pid);
+          return;
+        }
+        if (mod && k === 'v' && pid && s.pageClipboard) {
+          e.preventDefault();
+          s.pastePage(pid);
+          return;
+        }
+      }
 
       if (mod && k === 'k') {
         e.preventDefault();
