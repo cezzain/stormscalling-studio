@@ -10,6 +10,25 @@ const STATUS_COLOR: Record<SceneStatus, string> = {
   done: 'var(--s-done)',
 };
 
+// Default titles for newly-created nodes, by kind.
+const KIND_TITLE: Record<Page['kind'], string> = {
+  book: 'New book',
+  part: 'New part',
+  chapter: 'New chapter',
+  page: 'Untitled page',
+  folder: 'New folder',
+};
+
+// Child kinds offered in the context menu, following the manuscript hierarchy
+// Part → Chapter → Page. A leaf page offers a sibling page.
+const ADD_BY_KIND: Record<Page['kind'], Page['kind'][]> = {
+  book: ['part', 'chapter', 'page'],
+  part: ['chapter', 'page'],
+  chapter: ['page'],
+  folder: ['page', 'folder'],
+  page: ['page'],
+};
+
 const NAV: Array<{ id: ReturnType<typeof Object.keys>[number]; label: string; icon: keyof typeof Icon }> = [
   { id: 'editor', label: 'Manuscript', icon: 'Manuscript' },
   { id: 'lore', label: 'Lore', icon: 'Pin' },
@@ -75,8 +94,11 @@ export function Sidebar() {
   const addChild = async (parentId: string | null, kind: Page['kind'], title: string, section?: Page['section']) => {
     const page = await store.createPage({ parent_id: parentId, kind, title, ...(section ? { section } : {}) });
     if (parentId) store.setExpanded(parentId, true);
+    store.setExpanded(page.id, true);
     if (kind === 'page') store.selectPage(page.id);
-    else store.selectChapter(page.id);
+    else if (kind === 'chapter') store.selectChapter(page.id);
+    // Parts/books/folders are organisational — just reveal them, don't open the
+    // editor on an empty container. The user adds a chapter inside next.
     setMenu(null);
   };
 
@@ -372,7 +394,7 @@ export function Sidebar() {
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '2px 8px 16px', minHeight: 0 }}>
           {/* MANUSCRIPT */}
-          <SectionHeader label="MANUSCRIPT" onAdd={() => addChild(null, 'page', 'Untitled page', 'manuscript')} />
+          <SectionHeader label="MANUSCRIPT" addTitle="New part" onAdd={() => addChild(null, 'part', 'New part', 'manuscript')} />
           {manuscriptRoots.map((r) => renderNode(r, 0))}
 
           {/* LORE */}
@@ -491,8 +513,7 @@ export function Sidebar() {
             setRenaming(menu.node.id);
             setMenu(null);
           }}
-          onAddPage={() => addChild(menu.node.kind === 'page' ? menu.node.parent_id : menu.node.id, 'page', 'Untitled page')}
-          onAddChapter={() => addChild(menu.node.kind === 'page' ? menu.node.parent_id : menu.node.id, 'chapter', 'New chapter')}
+          onAdd={(kind) => addChild(menu.node.kind === 'page' ? menu.node.parent_id : menu.node.id, kind, KIND_TITLE[kind])}
           onDuplicate={() => { store.duplicatePage(menu.node.id); setMenu(null); }}
           onStatus={(s) => setStatus(menu.node.id, s)}
           onPin={() => togglePin(menu.node)}
@@ -522,11 +543,11 @@ export function Sidebar() {
   );
 }
 
-function SectionHeader({ label, onAdd, style }: { label: string; onAdd: () => void; style?: React.CSSProperties }) {
+function SectionHeader({ label, onAdd, addTitle, style }: { label: string; onAdd: () => void; addTitle?: string; style?: React.CSSProperties }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 8px 4px', ...style }}>
       <span style={{ fontSize: 10.5, letterSpacing: 1.6, color: 'var(--ink-3)', fontWeight: 600 }}>{label}</span>
-      <span onClick={onAdd} title="Add" style={{ fontSize: 16, color: 'var(--ink-3)', cursor: 'pointer', lineHeight: 1 }}>
+      <span onClick={onAdd} title={addTitle ?? 'Add'} style={{ fontSize: 16, color: 'var(--ink-3)', cursor: 'pointer', lineHeight: 1 }}>
         +
       </span>
     </div>
@@ -536,8 +557,7 @@ function SectionHeader({ label, onAdd, style }: { label: string; onAdd: () => vo
 function ContextMenu({
   menu,
   onRename,
-  onAddPage,
-  onAddChapter,
+  onAdd,
   onDuplicate,
   onStatus,
   onPin,
@@ -545,8 +565,7 @@ function ContextMenu({
 }: {
   menu: MenuState;
   onRename: () => void;
-  onAddPage: () => void;
-  onAddChapter: () => void;
+  onAdd: (kind: Page['kind']) => void;
   onDuplicate: () => void;
   onStatus: (s: SceneStatus | null) => void;
   onPin: () => void;
@@ -560,7 +579,10 @@ function ContextMenu({
     whiteSpace: 'nowrap',
     borderRadius: 7,
   };
-  const isContainer = menu.node.kind !== 'page';
+  // Which child kinds make sense under this node, following the
+  // Part → Chapter → Page hierarchy. A leaf page offers a sibling page.
+  const addKinds = ADD_BY_KIND[menu.node.kind] ?? ['page'];
+  const isLeaf = menu.node.kind === 'page';
   return (
     <div
       className="glass"
@@ -568,9 +590,9 @@ function ContextMenu({
       style={{
         position: 'fixed',
         left: Math.min(menu.x, window.innerWidth - 200),
-        top: Math.min(menu.y, window.innerHeight - 320),
+        top: Math.min(menu.y, window.innerHeight - 360),
         zIndex: 100,
-        width: 190,
+        width: 196,
         background: 'var(--surface-2)',
         border: '1px solid var(--line-2)',
         borderRadius: 11,
@@ -582,14 +604,11 @@ function ContextMenu({
       <div style={item} onClick={onRename}>
         Rename
       </div>
-      <div style={item} onClick={onAddPage}>
-        New page inside
-      </div>
-      {isContainer && (
-        <div style={item} onClick={onAddChapter}>
-          New chapter inside
+      {addKinds.map((kind) => (
+        <div key={kind} style={item} onClick={() => onAdd(kind)}>
+          New {kind} {isLeaf ? 'after' : 'inside'}
         </div>
-      )}
+      ))}
       <div style={item} onClick={onDuplicate}>
         Duplicate <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>⌘D</span>
       </div>
