@@ -13,17 +13,25 @@ services:
       NODE_ENV: production
       PORT: "8080"
 
-      # ---- AI (add the key for whichever provider you use) ----
-      ANTHROPIC_API_KEY: ""       # sk-ant-...  ← paste your key here
-      # OPENAI_API_KEY: ""
-      # GEMINI_API_KEY: ""
+      # ---- Secrets come from a local `.env` file next to this one ----
+      # Create `.env` on the NAS with only the lines you need — it is gitignored,
+      # so your keys never get committed. Anything omitted falls back to empty.
+      # Example .env:
+      #   GEMINI_API_KEY=AQ.your-key
+      #   AUTH_USERNAME=azeem
+      #   AUTH_PASSWORD=a-strong-password
+      #   SESSION_SECRET=<output of: openssl rand -hex 32>
+
+      # ---- AI (set the key for whichever provider you use) ----
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"   # sk-ant-...
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
 
       # ---- Login wall (strongly recommended on a NAS) ----
-      # Leave AUTH_USERNAME/AUTH_PASSWORD blank → no login required (LAN-only is safe).
+      # Leave both blank → no login required (LAN-only is safe).
       # Set both → login screen appears every time you open the app.
-      AUTH_USERNAME: ""           # e.g.  azeem
-      AUTH_PASSWORD: ""           # use a strong password
+      AUTH_USERNAME: "${AUTH_USERNAME:-}"
+      AUTH_PASSWORD: "${AUTH_PASSWORD:-}"
 
       # Optional: sign the session cookie with a dedicated secret.
-      # Generate one in a terminal:  openssl rand -hex 32
-      SESSION_SECRET: ""
+      SESSION_SECRET: "${SESSION_SECRET:-}"
