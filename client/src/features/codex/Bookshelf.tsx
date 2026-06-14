@@ -117,8 +117,8 @@ export function Bookshelf() {
           onClick={createVolume}
           title="Add a volume"
           style={{
-            width: DEPTH + 26, height: BOOK_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7,
-            border: '1.5px dashed var(--line-2)', borderRadius: 10, color: 'var(--ink-3)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 11, textAlign: 'center',
+            width: 132, height: BOOK_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7,
+            border: '1.5px dashed var(--line-2)', borderRadius: 11, color: 'var(--ink-3)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 12, textAlign: 'center',
           }}
         >
           <Icon.Plus size={18} />
@@ -132,73 +132,41 @@ export function Bookshelf() {
   );
 }
 
-const COVER_W = 156;
+const BOOK_W = 172;
 const BOOK_H = 232;
-const DEPTH = 46;
 
-// A 3D book standing spine-out on the shelf. At rest you see the spine; on
-// hover it swings a little to reveal the cover; clicking opens it fully.
+// A plain front-facing book cover. Hovering lifts and tilts it slightly;
+// clicking opens it into the entries view.
 function BookSpine({ shelf, count, delay, onOpen }: { shelf: Volume; count: number; delay: number; onOpen: () => void }) {
   const [hover, setHover] = useState(false);
-  // rotateY: 76° ≈ spine to camera, 26° ≈ cover cracked open toward viewer.
-  const rot = hover ? 26 : 76;
-  const faceBase: React.CSSProperties = { position: 'absolute', left: '50%', top: '50%', backfaceVisibility: 'hidden' };
   return (
-    <div style={{ perspective: 1400, width: DEPTH + 26, height: BOOK_H, animation: `fadeup .5s ${delay}s both` }}>
+    <div style={{ perspective: 1100, width: BOOK_W, height: BOOK_H, animation: `fadeup .5s ${delay}s both` }}>
       <div
         onClick={onOpen}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         title={`Open ${shelf.label}`}
         style={{
-          position: 'relative', width: COVER_W, height: BOOK_H, cursor: 'pointer',
-          transformStyle: 'preserve-3d',
-          transform: `translateX(${(DEPTH - COVER_W) / 2 + 13}px) translateY(${hover ? -10 : 0}px) rotateY(${rot}deg)`,
-          transition: 'transform .55s var(--spring, ease)',
-          filter: hover ? 'drop-shadow(0 22px 30px rgba(0,0,0,.34))' : 'drop-shadow(0 12px 20px rgba(0,0,0,.22))',
+          position: 'relative', width: BOOK_W, height: BOOK_H, cursor: 'pointer',
+          borderRadius: '4px 11px 11px 4px', background: shelf.cover,
+          boxShadow: hover ? '0 22px 40px rgba(0,0,0,.28)' : 'var(--shadow)',
+          transform: hover ? 'translateY(-8px) rotateY(-12deg)' : 'translateY(0) rotateY(-3deg)',
+          transformOrigin: 'left center', transition: 'transform .4s var(--spring, ease), box-shadow .35s ease',
+          display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px 18px',
         }}
       >
-        {/* COVER — wide front face */}
-        <div
-          style={{
-            ...faceBase, width: COVER_W, height: BOOK_H, marginLeft: -COVER_W / 2, marginTop: -BOOK_H / 2,
-            transform: `translateZ(${DEPTH / 2}px)`, background: shelf.cover, borderRadius: '3px 11px 11px 3px',
-            padding: '22px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-          }}
-        >
-          <div style={{ position: 'absolute', left: 8, top: 10, bottom: 10, width: 3, background: 'rgba(0,0,0,.2)', borderRadius: 2 }} />
-          <div style={{ fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: 1.5, color: 'rgba(255,255,255,.7)', fontWeight: 600 }}>VOLUME</div>
-          <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 23, lineHeight: 1.1, color: '#F5EEDF' }}>{shelf.label}</div>
-            <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.72)', marginTop: 7 }}>{shelf.subtitle}</div>
-          </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'rgba(255,255,255,.85)' }}>
-            <span style={{ minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10, background: 'rgba(0,0,0,.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>{count}</span>
-            {count === 1 ? 'entry' : 'entries'}
-          </div>
+        {/* spine highlight + page edge */}
+        <div style={{ position: 'absolute', left: 9, top: 0, bottom: 0, width: 3, background: 'rgba(0,0,0,.22)', borderRadius: 2 }} />
+        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 6, background: 'rgba(255,255,255,.12)', borderRadius: '0 11px 11px 0' }} />
+        <div style={{ fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: 1.5, color: 'rgba(255,255,255,.7)', fontWeight: 600 }}>VOLUME</div>
+        <div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 23, lineHeight: 1.1, color: '#F5EEDF' }}>{shelf.label}</div>
+          <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.72)', marginTop: 7 }}>{shelf.subtitle}</div>
         </div>
-
-        {/* SPINE — narrow left face, title runs vertically */}
-        <div
-          style={{
-            ...faceBase, width: DEPTH, height: BOOK_H, marginLeft: -DEPTH / 2, marginTop: -BOOK_H / 2,
-            transform: `rotateY(-90deg) translateZ(${COVER_W / 2}px)`, background: shelf.cover, filter: 'brightness(.86)',
-            borderRadius: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: 'inset 2px 0 6px rgba(0,0,0,.25), inset -2px 0 6px rgba(0,0,0,.25)',
-          }}
-        >
-          <span style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontFamily: 'var(--font-display)', fontSize: 16, letterSpacing: 1, color: '#F5EEDF', whiteSpace: 'nowrap' }}>{shelf.label}</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'rgba(255,255,255,.85)' }}>
+          <span style={{ minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10, background: 'rgba(0,0,0,.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>{count}</span>
+          {count === 1 ? 'entry' : 'entries'}
         </div>
-
-        {/* PAGES — right edge */}
-        <div
-          style={{
-            ...faceBase, width: DEPTH, height: BOOK_H - 8, marginLeft: -DEPTH / 2, marginTop: -(BOOK_H - 8) / 2,
-            transform: `rotateY(90deg) translateZ(${COVER_W / 2}px)`,
-            background: 'repeating-linear-gradient(90deg, var(--surface), var(--surface) 2px, var(--surface-2) 2px, var(--surface-2) 4px)',
-            borderRadius: 2,
-          }}
-        />
       </div>
     </div>
   );
