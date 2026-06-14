@@ -1,0 +1,29 @@
+services:
+  studio:
+    build: .
+    container_name: storms-calling-studio
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # Your writing data (SQLite DB + images) lives here on the NAS.
+      # Change the left side to any folder path you want on your NAS.
+      - ./data:/app/data
+    environment:
+      NODE_ENV: production
+      PORT: "8080"
+
+      # ---- AI (add the key for whichever provider you use) ----
+      ANTHROPIC_API_KEY: ""       # sk-ant-...  ← paste your key here
+      # OPENAI_API_KEY: ""
+      # GEMINI_API_KEY: ""
+
+      # ---- Login wall (strongly recommended on a NAS) ----
+      # Leave AUTH_USERNAME/AUTH_PASSWORD blank → no login required (LAN-only is safe).
+      # Set both → login screen appears every time you open the app.
+      AUTH_USERNAME: ""           # e.g.  azeem
+      AUTH_PASSWORD: ""           # use a strong password
+
+      # Optional: sign the session cookie with a dedicated secret.
+      # Generate one in a terminal:  openssl rand -hex 32
+      SESSION_SECRET: ""
