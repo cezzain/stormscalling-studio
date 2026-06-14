@@ -1,16 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../../lib/store';
 import { loadAppearance } from '../../lib/appearance';
-import { useEditorUi } from '../../lib/editorUi';
 import { useActiveEditor } from './activeEditor';
-import { api } from '../../lib/api';
 import { Icon } from '../../lib/icons';
 import { SceneEditor } from './SceneEditor';
 import { Toolbar } from './Toolbar';
 import { StatusBar } from './StatusBar';
-import { SelectionToolbar } from './SelectionToolbar';
-import { DiffPanel } from './DiffPanel';
-import { ContinuityPanel } from './ContinuityPanel';
 import type { SceneStatus } from '../../lib/types';
 
 // Physical page geometry (US-Letter at 96dpi) — must match the page-card style
@@ -29,9 +24,6 @@ export function EditorView() {
   const { pages, pageId, chapterId, focus, settings, view } = useStore();
   const createPage = useStore((s) => s.createPage);
   const deletePage = useStore((s) => s.deletePage);
-  const hasKey = useStore((s) => s.hasKey);
-  const diff = useEditorUi((s) => s.diff);
-  const setContinuity = useEditorUi((s) => s.setContinuity);
   const activePageId = useActiveEditor((s) => s.pageId);
 
   const container = pages.find((p) => p.id === chapterId) ?? pages.find((p) => p.id === pageId);
@@ -93,37 +85,6 @@ export function EditorView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePageId]);
 
-  // load persisted continuity flags when the focused page changes; keep panel closed
-  useEffect(() => {
-    setContinuity({ continuityOpen: false, continuityLoading: false, continuityFlags: [] });
-    if (pageId) {
-      api.ai
-        .continuityGet(pageId)
-        .then((r) => setContinuity({ continuityFlags: r.flags }))
-        .catch(() => {});
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageId]);
-
-  const runContinuity = async () => {
-    if (!pageId) return;
-    setContinuity({ continuityOpen: true });
-    if (!hasKey) {
-      setContinuity({
-        continuityLoading: false,
-        continuityFlags: [{ id: 'nokey', quote: 'Co-writer unavailable', issue: 'No API key', suggestion: 'Add ANTHROPIC_API_KEY to your .env and restart to run continuity checks.' }],
-      });
-      return;
-    }
-    setContinuity({ continuityLoading: true });
-    try {
-      const r = await api.ai.continuityRun(pageId);
-      setContinuity({ continuityLoading: false, continuityFlags: r.flags });
-    } catch (err: any) {
-      setContinuity({ continuityLoading: false, continuityFlags: [{ id: 'err', quote: 'Check failed', issue: 'Error', suggestion: err?.message ?? 'unknown error' }] });
-    }
-  };
-
   // New pages stay in whatever section we're viewing — a page added from the
   // Lore tab lands under the LORE dropdown, not in the manuscript.
   const section = view === 'lore' ? 'lore' : 'manuscript';
@@ -138,7 +99,7 @@ export function EditorView() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-      {!focus && <Toolbar onContinuity={runContinuity} />}
+      {!focus && <Toolbar />}
 
       <div
         data-editor-scroll
@@ -226,8 +187,6 @@ export function EditorView() {
                 <Icon.Plus size={16} />
                 Add a {section === 'lore' ? 'lore page' : 'page'}
               </button>
-
-              <ContinuityPanel />
             </>
           ) : (
             <EmptyState section={section} />
@@ -236,9 +195,6 @@ export function EditorView() {
       </div>
 
       {!focus && <StatusBar />}
-
-      <SelectionToolbar />
-      {diff && <DiffPanel />}
     </div>
   );
 }

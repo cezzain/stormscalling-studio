@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useStore } from '../../lib/store';
 import { api } from '../../lib/api';
 import { THEMES } from '../../lib/themes';
@@ -14,25 +14,9 @@ import {
 const FONTS = ['Lora', 'IM Fell English', 'Inter'];
 
 export function SettingsView() {
-  const { settings, calendar, model, hasKey, theme, typewriter, provider, aiProviders } = useStore();
+  const { settings, calendar, theme, typewriter } = useStore();
   const setTheme = useStore((s) => s.setTheme);
   const toggleTypewriter = useStore((s) => s.toggleTypewriter);
-  const refreshAi = useStore((s) => s.refreshAi);
-  const [sys, setSys] = useState(settings.system_prompt ?? '');
-  const [modelDraft, setModelDraft] = useState(model);
-  const activeProvider = aiProviders.find((p) => p.id === provider);
-
-  useEffect(() => setModelDraft(model), [model, provider]);
-
-  const changeProvider = async (id: string) => {
-    await api.settings.update({ ai_provider: id });
-    await refreshAi();
-  };
-  const saveModel = async () => {
-    const value = modelDraft.trim() || activeProvider?.defaultModel || model;
-    await api.settings.update({ [`model_${provider}`]: value });
-    await refreshAi();
-  };
   const [appear, setAppearState] = useState<Appearance>(loadAppearance);
   const setAppear = (patch: Partial<Appearance>) => {
     setAppearState((prev) => {
@@ -72,43 +56,6 @@ export function SettingsView() {
     <div style={{ height: '100%', overflowY: 'auto', display: 'flex', justifyContent: 'center', padding: '40px 24px 80px' }}>
       <div style={{ width: '100%', maxWidth: 640 }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 30, margin: '0 0 26px', color: 'var(--ink)' }}>Settings</h1>
-
-        <Section title="AI">
-          <Row label="Provider" hint="Which AI writes with you">
-            <select value={provider} onChange={(e) => changeProvider(e.target.value)} style={selStyle()}>
-              {aiProviders.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.label}
-                  {p.hasKey ? '' : ' — no key'}
-                </option>
-              ))}
-            </select>
-          </Row>
-          <Row label="Model" hint={activeProvider ? `e.g. ${activeProvider.suggestedModels.slice(0, 3).join(', ')}` : 'Model id'}>
-            <input
-              value={modelDraft}
-              onChange={(e) => setModelDraft(e.target.value)}
-              onBlur={saveModel}
-              onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-              list="model-suggestions"
-              style={inStyle('ui-monospace,monospace')}
-            />
-            <datalist id="model-suggestions">
-              {activeProvider?.suggestedModels.map((m) => <option key={m} value={m} />)}
-            </datalist>
-          </Row>
-          <Row label="API key" hint={activeProvider ? `Set ${activeProvider.envVar} in your .env file` : 'Stored locally in .env, never synced'}>
-            <Value mono>{hasKey ? '•••• ••••  ✓ valid' : 'not set — co-writer disabled'}</Value>
-          </Row>
-          <Row label="System prompt" hint="The co-writer's default instructions" stacked>
-            <textarea
-              value={sys}
-              onChange={(e) => setSys(e.target.value)}
-              onBlur={() => persist({ system_prompt: sys })}
-              style={{ width: '100%', minHeight: 120, marginTop: 8, padding: '10px 12px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--canvas)', color: 'var(--ink)', fontFamily: 'var(--font-ui)', fontSize: 12.5, lineHeight: 1.5, resize: 'vertical', outline: 'none' }}
-            />
-          </Row>
-        </Section>
 
         <Section title="Editor">
           <Row label="Manuscript font" hint="The face you write in">

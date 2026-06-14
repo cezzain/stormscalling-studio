@@ -13,7 +13,7 @@ const SIZES = ['16', '17', '18', '19', '20', '22'];
 const TEXT_COLORS = ['var(--ink)', 'var(--clay)', 'var(--forest-2)', 'var(--danger)', 'var(--sage)'];
 const HL_COLORS = ['var(--tan)', 'var(--clay-soft)', 'var(--sage)', 'var(--s-revised)'];
 
-export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
+export function Toolbar() {
   const editor = useActiveEditor((s) => s.editor);
   useActiveEditor((s) => s.tick); // re-render on selection change
   const settings = useStore((s) => s.settings);
@@ -154,23 +154,12 @@ export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
           </Dropdown>
         )}
       </div>
-
-      <div style={divider} />
-
-      <button
-        className="glass-btn"
-        onClick={onContinuity}
-        style={{ ...pillBtn('var(--font-ui)'), color: 'var(--clay)', fontWeight: 500, fontSize: 12 }}
-      >
-        <Icon.Check size={14} />
-        Check continuity
-      </button>
     </div>
     </div>
   );
 }
 
-// A compact glassy capsule for the font / size / continuity controls.
+// A compact glassy capsule for the font / size controls.
 const pillBtn = (font = 'var(--font-ui)'): React.CSSProperties => ({
   display: 'flex',
   alignItems: 'center',

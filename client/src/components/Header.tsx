@@ -6,10 +6,9 @@ import { THEMES } from '../lib/themes';
 import { useSession } from '../lib/session';
 
 export function Header() {
-  const { view, theme, chapterId, pageId, pages, focus, chatOpen } = useStore();
+  const { theme, chapterId, pageId, pages, focus } = useStore();
   const setTheme = useStore((s) => s.setTheme);
   const toggleFocus = useStore((s) => s.toggleFocus);
-  const toggleChat = useStore((s) => s.toggleChat);
   const toggleSidebar = useStore((s) => s.toggleSidebar);
   const openSearch = useStore((s) => s.openSearch);
   const saving = useEditorUi((s) => s.saving);
@@ -179,28 +178,6 @@ export function Header() {
             </div>
           )}
         </div>
-        <button
-          onClick={toggleChat}
-          title="Co-writer"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 7,
-            height: 32,
-            padding: '0 12px',
-            border: '1px solid var(--clay)',
-            background: chatOpen ? 'var(--clay)' : 'transparent',
-            color: chatOpen ? '#fff' : 'var(--clay)',
-            borderRadius: 9,
-            fontFamily: 'var(--font-ui)',
-            fontSize: 12,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
-          <Icon.Chat size={14} />
-          Co-writer
-        </button>
         {authRequired && (
           <button onClick={logout} title="Sign out" style={btn}>
             <Icon.Exit size={16} />

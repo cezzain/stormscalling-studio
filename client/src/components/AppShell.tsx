@@ -11,17 +11,14 @@ import { CodexView } from '../features/codex/CodexView';
 import { TimelineView } from '../features/timeline/TimelineView';
 import { MapView } from '../features/map/MapView';
 import { SettingsView } from '../features/settings/SettingsView';
-import { ChatPanel } from '../features/chat/ChatPanel';
 
 export function AppShell() {
-  const { view, focus, chatOpen, sidebarOpen, theme } = useStore();
+  const { view, focus, sidebarOpen, theme } = useStore();
   const toggleSidebar = useStore((s) => s.toggleSidebar);
-  const [narrow, setNarrow] = useState(window.innerWidth < 1200);
   const [compact, setCompact] = useState(window.innerWidth < 1000);
 
   useEffect(() => {
     const onResize = () => {
-      setNarrow(window.innerWidth < 1200);
       setCompact(window.innerWidth < 1000);
     };
     window.addEventListener('resize', onResize);
@@ -29,7 +26,6 @@ export function AppShell() {
   }, []);
 
   const canvasBg = focus ? (isDarkTheme(theme) ? 'rgba(10,13,10,0.6)' : 'rgba(222,212,194,0.5)') : 'transparent';
-  const showChat = chatOpen && !focus;
   // The sidebar honours the toggle at every width. On compact (iPad-portrait-ish)
   // widths it floats over the canvas; on wider screens it sits inline.
   const showSidebar = !focus && sidebarOpen;
@@ -71,8 +67,6 @@ export function AppShell() {
           {view === 'map' && <MapView />}
           {view === 'settings' && <SettingsView />}
         </main>
-
-        {showChat && <ChatPanel narrow={narrow} />}
       </div>
 
       <SearchOverlay />

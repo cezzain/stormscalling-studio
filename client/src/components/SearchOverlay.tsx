@@ -42,7 +42,7 @@ export function SearchOverlay() {
     if (item.type === 'page') selectPage(item.id);
     else if (item.type === 'entity') selectEntity(item.id);
     else if (item.type === 'timeline') setView('timeline');
-    else if (item.type === 'thread') { useStore.setState({ chatOpen: true }); }
+    // 'thread' (AI chat) results are ignored while the co-writer is disabled.
     close();
   };
 
