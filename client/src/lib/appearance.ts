@@ -8,6 +8,7 @@ export interface Appearance {
   msWidth: number; // writing column width, px
   msLine: number;  // manuscript line spacing
   msSize: number;  // manuscript font size, px
+  autoPageWords: number; // 0 = off; otherwise auto-start a new page past N words
 }
 
 export const APPEARANCE_DEFAULTS: Appearance = {
@@ -17,6 +18,7 @@ export const APPEARANCE_DEFAULTS: Appearance = {
   msWidth: 880,
   msLine: 1.82,
   msSize: 19,
+  autoPageWords: 400,
 };
 
 export const APPEARANCE_RANGES = {
@@ -26,6 +28,7 @@ export const APPEARANCE_RANGES = {
   msWidth: { min: 620, max: 1040, step: 20 },
   msLine: { min: 1.4, max: 2.3, step: 0.02 },
   msSize: { min: 16, max: 24, step: 1 },
+  autoPageWords: { min: 0, max: 1000, step: 50 },
 } as const;
 
 const KEY = 'scs-appearance';

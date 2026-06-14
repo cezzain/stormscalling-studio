@@ -162,6 +162,11 @@ export function SettingsView() {
             value={appear.msLine} {...APPEARANCE_RANGES.msLine}
             display={appear.msLine.toFixed(2)} onChange={(v) => setAppear({ msLine: v })}
           />
+          <Slider
+            label="Auto new page" hint="Start a fresh page past this many words (0 = off)"
+            value={appear.autoPageWords} {...APPEARANCE_RANGES.autoPageWords}
+            display={appear.autoPageWords === 0 ? 'Off' : `${appear.autoPageWords} w`} onChange={(v) => setAppear({ autoPageWords: v })}
+          />
           <Row label="Restore defaults" hint="Reset every appearance slider">
             <button onClick={resetAppear} style={btnStyle}>Reset</button>
           </Row>

@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useStore } from '../../lib/store';
+import { loadAppearance } from '../../lib/appearance';
 import { useEditorUi } from '../../lib/editorUi';
 import { useActiveEditor } from './activeEditor';
 import { api } from '../../lib/api';
@@ -35,6 +36,23 @@ export function EditorView() {
   const parent = container ? pages.find((p) => p.id === container.parent_id) : undefined;
   const partLabel = parent ? parent.title : container?.kind === 'page' ? 'Standalone page' : '';
   const status = (container?.status ?? null) as SceneStatus | null;
+
+  // Auto-pagination: when the last page of a chapter fills past the configured
+  // word limit, start a fresh page after it so the writing flows on.
+  const autoPaging = useRef(false);
+  const wordSignature = cards.map((c) => c.word_count || 0).join(',');
+  useEffect(() => {
+    if (!container || container.kind !== 'chapter') return;
+    const limit = loadAppearance().autoPageWords;
+    if (!limit) return;
+    const last = cards[cards.length - 1];
+    if (!last || (last.word_count || 0) < limit || autoPaging.current) return;
+    autoPaging.current = true;
+    createPage({ parent_id: container.id, kind: 'page', title: 'Untitled page' }).finally(() => {
+      autoPaging.current = false;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wordSignature, container?.id]);
 
   // keep store.pageId in sync with whichever card is focused
   useEffect(() => {
