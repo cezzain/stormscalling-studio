@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../../lib/store';
 import { loadAppearance } from '../../lib/appearance';
 import { useEditorUi } from '../../lib/editorUi';
@@ -12,6 +12,14 @@ import { SelectionToolbar } from './SelectionToolbar';
 import { DiffPanel } from './DiffPanel';
 import { ContinuityPanel } from './ContinuityPanel';
 import type { SceneStatus } from '../../lib/types';
+
+// Physical page geometry (US-Letter at 96dpi) — must match the page-card style
+// below. The printable area is the sheet height minus its top/bottom margins;
+// once the text passes it, a fresh page is spawned.
+const PAGE_HEIGHT = 1056;
+const PAGE_PAD_TOP = 96;
+const PAGE_PAD_BOTTOM = 112;
+const CONTENT_MAX = PAGE_HEIGHT - PAGE_PAD_TOP - PAGE_PAD_BOTTOM; // 848px
 
 const STATUS_COLOR: Record<SceneStatus, string> = { draft: 'var(--s-draft)', revised: 'var(--s-revised)', done: 'var(--s-done)' };
 const STATUS_LABEL: Record<SceneStatus, string> = { draft: 'Draft', revised: 'Revised', done: 'Done' };
@@ -37,22 +45,44 @@ export function EditorView() {
   const partLabel = parent ? parent.title : container?.kind === 'page' ? 'Standalone page' : '';
   const status = (container?.status ?? null) as SceneStatus | null;
 
-  // Auto-pagination: when the last page of a chapter fills past the configured
-  // word limit, start a fresh page after it so the writing flows on.
+  // Auto-pagination, Microsoft-Word style: a new sheet appears the moment the
+  // current page physically fills up. We measure the rendered height of the
+  // last page's text (which accounts for font size, headings, images, line
+  // spacing — everything Word cares about) rather than counting words.
   const autoPaging = useRef(false);
-  const wordSignature = cards.map((c) => c.word_count || 0).join(',');
+  const [autoFocusId, setAutoFocusId] = useState<string | null>(null);
+  const lastCardRef = useRef<HTMLDivElement | null>(null);
+  const lastCard = cards[cards.length - 1];
   useEffect(() => {
-    if (!container || container.kind !== 'chapter') return;
-    const limit = loadAppearance().autoPageWords;
-    if (!limit) return;
-    const last = cards[cards.length - 1];
-    if (!last || (last.word_count || 0) < limit || autoPaging.current) return;
-    autoPaging.current = true;
-    createPage({ parent_id: container.id, kind: 'page', title: 'Untitled page' }).finally(() => {
-      autoPaging.current = false;
-    });
+    // Only flow within a real multi-page container (a chapter/part/folder that
+    // already holds page cards) — never turn a standalone page into children.
+    if (!container || childPages.length === 0) return;
+    if (loadAppearance().autoPageWords <= 0) return; // 0 = feature off
+    const card = lastCardRef.current;
+    if (!card) return;
+    const check = () => {
+      if (autoPaging.current) return;
+      const pm = card.querySelector('.ProseMirror') as HTMLElement | null;
+      if (!pm) return;
+      // printable area = page height minus its top + bottom margins
+      if (pm.scrollHeight <= CONTENT_MAX) return;
+      autoPaging.current = true;
+      createPage({ parent_id: container.id, kind: 'page', title: 'Untitled page' })
+        .then((np) => {
+          setAutoFocusId(np.id);
+          useStore.setState({ pageId: np.id });
+        })
+        .finally(() => {
+          autoPaging.current = false;
+        });
+    };
+    const ro = new ResizeObserver(check);
+    const pm = card.querySelector('.ProseMirror');
+    if (pm) ro.observe(pm);
+    check();
+    return () => ro.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wordSignature, container?.id]);
+  }, [container?.id, childPages.length, lastCard?.id]);
 
   // keep store.pageId in sync with whichever card is focused
   useEffect(() => {
@@ -143,6 +173,7 @@ export function EditorView() {
               {cards.map((pg, i) => (
                 <div key={pg.id} style={{ marginBottom: 48 }}>
                   <div
+                    ref={i === cards.length - 1 ? lastCardRef : undefined}
                     onClick={() => useStore.setState({ pageId: pg.id })}
                     style={{
                       background: 'var(--page-bg)',
@@ -150,14 +181,14 @@ export function EditorView() {
                       borderRadius: 2,
                       boxShadow: pg.id === pageId ? 'var(--page-shadow-active)' : 'var(--page-shadow)',
                       padding: '96px 96px 112px',
-                      minHeight: 1056,
+                      minHeight: PAGE_HEIGHT,
                       position: 'relative',
                       outline: pg.id === pageId ? '2px solid rgba(168,105,60,0.30)' : 'none',
                       outlineOffset: 2,
                       transition: 'box-shadow 0.2s ease, outline 0.2s ease',
                     }}
                   >
-                    <SceneEditor page={pg} focused={pg.id === pageId} />
+                    <SceneEditor page={pg} focused={pg.id === pageId} autoFocus={pg.id === autoFocusId} />
                     {/* page footer */}
                     <div style={{ position: 'absolute', bottom: 36, left: 0, right: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, pointerEvents: 'none' }}>
                       <span style={{ fontFamily: 'var(--font-ui)', fontSize: 11, color: 'var(--ink-3)', letterSpacing: 0.3 }}>{pg.title}</span>

@@ -23,7 +23,7 @@ import type { Page } from '../../lib/types';
 const SAVE_DELAY = 800;
 const LINK_DELAY = 240;
 
-export function SceneEditor({ page, focused }: { page: Page; focused: boolean }) {
+export function SceneEditor({ page, focused, autoFocus }: { page: Page; focused: boolean; autoFocus?: boolean }) {
   const updatePageLocal = useStore((s) => s.updatePageLocal);
   const typewriter = useStore((s) => s.typewriter);
   const setSaving = useEditorUi((s) => s.setSaving);
@@ -205,6 +205,13 @@ export function SceneEditor({ page, focused }: { page: Page; focused: boolean })
     if (editor && focused) setActive(editor, page.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, focused]);
+
+  // when this page was just spawned by auto-pagination, drop the caret into it
+  // so writing flows straight onto the new sheet (just like Word).
+  useEffect(() => {
+    if (editor && autoFocus) editor.commands.focus('start');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, autoFocus]);
 
   return (
     <>

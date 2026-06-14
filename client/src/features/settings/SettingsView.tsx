@@ -177,11 +177,16 @@ export function SettingsView() {
             value={appear.msLine} {...APPEARANCE_RANGES.msLine}
             display={appear.msLine.toFixed(2)} onChange={(v) => setAppear({ msLine: v })}
           />
-          <Slider
-            label="Auto new page" hint="Start a fresh page past this many words (0 = off)"
-            value={appear.autoPageWords} {...APPEARANCE_RANGES.autoPageWords}
-            display={appear.autoPageWords === 0 ? 'Off' : `${appear.autoPageWords} w`} onChange={(v) => setAppear({ autoPageWords: v })}
-          />
+          <Row label="Auto pages (Word-style)" hint="Start a fresh sheet automatically when a page fills up">
+            <select
+              value={appear.autoPageWords > 0 ? 'on' : 'off'}
+              onChange={(e) => setAppear({ autoPageWords: e.target.value === 'on' ? 400 : 0 })}
+              style={selStyle()}
+            >
+              <option value="off">Off</option>
+              <option value="on">On</option>
+            </select>
+          </Row>
           <Row label="Restore defaults" hint="Reset every appearance slider">
             <button onClick={resetAppear} style={btnStyle}>Reset</button>
           </Row>
