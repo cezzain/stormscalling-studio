@@ -9,7 +9,10 @@ export function Bookshelf() {
   const entities = useStore((s) => s.entities);
   const selectEntity = useStore((s) => s.selectEntity);
   const refreshEntities = useStore((s) => s.refreshEntities);
+  const createPage = useStore((s) => s.createPage);
+  const selectChapter = useStore((s) => s.selectChapter);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
   const [volumes, setVolumes] = useState<Volume[]>(getVolumes);
 
   const countFor = (vol: Volume) => entities.filter((e) => vol.types.includes(e.type)).length;
@@ -23,6 +26,15 @@ export function Bookshelf() {
   const createVolume = () => {
     const name = window.prompt('Name your new volume (e.g. Magic, Beasts, Religions)');
     if (name && name.trim()) setVolumes(addVolume(name));
+  };
+  // A "manuscript book" is a separate top-level story in the Manuscript tree —
+  // somewhere to keep side stories, drafts, or anything else for later.
+  const createBook = async () => {
+    setAddOpen(false);
+    const name = window.prompt('Name your new book (a separate story or notebook)');
+    if (!name || !name.trim()) return;
+    const book = await createPage({ parent_id: null, kind: 'book', title: name.trim(), section: 'manuscript' });
+    selectChapter(book.id); // jump into the Manuscript view, focused on the new book
   };
   const deleteVolume = async (vol: Volume) => {
     const inVol = entities.filter((e) => vol.types.includes(e.type));
@@ -142,17 +154,45 @@ export function Bookshelf() {
             <div style={{ display: 'flex', gap: 20, alignItems: 'flex-end', justifyContent: 'center', padding: '0 18px' }}>
               {row.map((slot) =>
                 slot.kind === 'add' ? (
-                  <div
-                    key="__add"
-                    onClick={createVolume}
-                    title="Add a volume"
-                    style={{
-                      width: 132, height: BOOK_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7,
-                      border: '1.5px dashed var(--line-2)', borderRadius: 11, color: 'var(--ink-3)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 12, textAlign: 'center', flex: '0 0 auto',
-                    }}
-                  >
-                    <Icon.Plus size={18} />
-                    Add<br />volume
+                  <div key="__add" style={{ position: 'relative', flex: '0 0 auto' }}>
+                    <div
+                      onClick={() => setAddOpen((o) => !o)}
+                      title="Add a volume or a book"
+                      style={{
+                        width: 132, height: BOOK_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7,
+                        border: '1.5px dashed var(--line-2)', borderRadius: 11, color: 'var(--ink-3)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 12, textAlign: 'center',
+                      }}
+                    >
+                      <Icon.Plus size={18} />
+                      Add<br />new
+                    </div>
+                    {addOpen && (
+                      <>
+                        <div onClick={() => setAddOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
+                        <div
+                          className="glass"
+                          style={{
+                            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 51,
+                            width: 214, padding: 6, borderRadius: 13, border: '1px solid var(--line-2)', boxShadow: 'var(--shadow)',
+                          }}
+                        >
+                          <button onClick={() => { setAddOpen(false); createVolume(); }} style={addItem}>
+                            <Icon.Codex size={16} />
+                            <span style={{ display: 'block' }}>
+                              <span style={{ fontWeight: 600 }}>Codex volume</span>
+                              <span style={{ display: 'block', fontSize: 10.5, color: 'var(--ink-3)' }}>A new book of entries</span>
+                            </span>
+                          </button>
+                          <button onClick={createBook} style={addItem}>
+                            <Icon.Manuscript size={16} />
+                            <span style={{ display: 'block' }}>
+                              <span style={{ fontWeight: 600 }}>Manuscript book</span>
+                              <span style={{ display: 'block', fontSize: 10.5, color: 'var(--ink-3)' }}>A separate story to write</span>
+                            </span>
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <BookSpine key={slot.vol.id} shelf={slot.vol} count={countFor(slot.vol)} delay={slot.delay} onOpen={() => setOpenId(slot.vol.id)} />
@@ -180,6 +220,12 @@ export function Bookshelf() {
 const BOOK_W = 172;
 const BOOK_H = 232;
 const BOOKS_PER_SHELF = 6;
+
+const addItem: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 10px',
+  border: 'none', background: 'transparent', borderRadius: 9, cursor: 'pointer',
+  color: 'var(--ink)', fontFamily: 'var(--font-ui)', fontSize: 12.5, textAlign: 'left',
+};
 
 // A plain front-facing book cover. Hovering lifts and tilts it slightly;
 // clicking opens it into the entries view.
