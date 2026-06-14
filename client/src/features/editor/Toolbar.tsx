@@ -31,35 +31,53 @@ export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
     api.settings.update(patch).catch(() => {});
   };
 
+  // Floating pill buttons — App-Store-tab-bar style. The active state gets a
+  // bright glassy capsule with a clay glow so it reads like a selected tab.
   const tbBtn = (active: boolean, extra?: React.CSSProperties): React.CSSProperties => ({
-    width: 30,
-    height: 30,
+    minWidth: 32,
+    height: 32,
     display: 'grid',
     placeItems: 'center',
-    border: 'none',
-    background: active ? 'var(--clay-soft)' : 'transparent',
-    borderRadius: 7,
+    padding: '0 4px',
+    border: active ? '1px solid rgba(255,255,255,0.5)' : '1px solid transparent',
+    background: active
+      ? 'linear-gradient(160deg, color-mix(in srgb, var(--clay) 30%, transparent), color-mix(in srgb, var(--clay) 14%, transparent))'
+      : 'transparent',
+    boxShadow: active
+      ? 'inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 8px color-mix(in srgb, var(--clay) 34%, transparent)'
+      : 'none',
+    borderRadius: 999,
     cursor: 'pointer',
     color: active ? 'var(--clay)' : 'var(--ink-2)',
+    transition: 'background 0.18s var(--spring, ease), box-shadow 0.18s ease, color 0.15s ease',
     ...extra,
   });
-  const divider = { paddingRight: 8, marginRight: 5, borderRight: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 1 } as React.CSSProperties;
+  const divider = { paddingRight: 7, marginRight: 4, borderRight: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 2 } as React.CSSProperties;
 
   const is = (name: string, attrs?: Record<string, unknown>) => (editor ? editor.isActive(name, attrs) : false);
 
   return (
     <div
-      className="glass"
       style={{
         flex: '0 0 auto',
         display: 'flex',
+        justifyContent: 'center',
+        padding: '12px 16px 8px',
+        position: 'relative',
+        zIndex: 5,
+      }}
+    >
+    <div
+      className="glass"
+      style={{
+        display: 'flex',
         alignItems: 'center',
         gap: 3,
-        padding: '9px 16px',
-        background: 'var(--surface)',
-        borderBottom: '1px solid var(--line)',
+        padding: '6px 10px',
+        borderRadius: 999,
         flexWrap: 'wrap',
         position: 'relative',
+        maxWidth: '100%',
       }}
     >
       {/* marks */}
@@ -108,7 +126,7 @@ export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
 
       {/* font (manuscript column) */}
       <div style={{ position: 'relative' }}>
-        <button onClick={() => { setFontOpen((o) => !o); setSizeOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 8, height: 30, padding: '0 10px', border: '1px solid var(--line)', background: 'var(--canvas)', borderRadius: 7, cursor: 'pointer', color: 'var(--ink-2)', fontFamily: 'var(--font-body)', fontSize: 12.5 }}>
+        <button onClick={() => { setFontOpen((o) => !o); setSizeOpen(false); }} style={pillBtn('var(--font-body)')}>
           {font}
           <Icon.Chevron size={11} />
         </button>
@@ -123,7 +141,7 @@ export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
 
       {/* size */}
       <div style={{ position: 'relative' }}>
-        <button onClick={() => { setSizeOpen((o) => !o); setFontOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 10px', border: '1px solid var(--line)', background: 'var(--canvas)', borderRadius: 7, cursor: 'pointer', color: 'var(--ink-2)', fontSize: 12.5 }}>
+        <button onClick={() => { setSizeOpen((o) => !o); setFontOpen(false); }} style={pillBtn()}>
           {size}
           <Icon.Chevron size={11} />
         </button>
@@ -136,18 +154,35 @@ export function Toolbar({ onContinuity }: { onContinuity: () => void }) {
         )}
       </div>
 
-      <div style={{ flex: 1 }} />
+      <div style={divider} />
 
       <button
         onClick={onContinuity}
-        style={{ display: 'flex', alignItems: 'center', gap: 7, height: 30, padding: '0 12px', border: '1px solid var(--line)', background: 'var(--canvas)', borderRadius: 8, cursor: 'pointer', color: 'var(--clay)', fontFamily: 'var(--font-ui)', fontSize: 12, fontWeight: 500 }}
+        style={{ ...pillBtn('var(--font-ui)'), color: 'var(--clay)', fontWeight: 500, fontSize: 12 }}
       >
         <Icon.Check size={14} />
         Check continuity
       </button>
     </div>
+    </div>
   );
 }
+
+// A compact glassy capsule for the font / size / continuity controls.
+const pillBtn = (font = 'var(--font-ui)'): React.CSSProperties => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 6,
+  height: 32,
+  padding: '0 12px',
+  border: '1px solid rgba(255,255,255,0.4)',
+  background: 'color-mix(in srgb, var(--canvas) 55%, transparent)',
+  borderRadius: 999,
+  cursor: 'pointer',
+  color: 'var(--ink-2)',
+  fontFamily: font,
+  fontSize: 12.5,
+});
 
 function Palette({ colors, onPick, onClear }: { colors: string[]; onPick: (c: string) => void; onClear: () => void }) {
   return (

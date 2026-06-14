@@ -143,9 +143,24 @@ export function SettingsView() {
             display={`${appear.clarity}%`} onChange={(v) => setAppear({ clarity: v })}
           />
           <Slider
+            label="Glass transparency" hint="See-through ↔ solid tint"
+            value={100 - appear.tint} {...APPEARANCE_RANGES.tint}
+            display={`${100 - appear.tint}%`} onChange={(v) => setAppear({ tint: 100 - v })}
+          />
+          <Slider
+            label="Edge sheen" hint="Refractive rim & highlight (liquid glass)"
+            value={appear.sheen} {...APPEARANCE_RANGES.sheen}
+            display={`${appear.sheen}%`} onChange={(v) => setAppear({ sheen: v })}
+          />
+          <Slider
             label="Background glow" hint="Ambient aurora intensity"
             value={appear.glow} {...APPEARANCE_RANGES.glow}
             display={`${appear.glow}%`} onChange={(v) => setAppear({ glow: v })}
+          />
+          <Slider
+            label="Aurora motion" hint="How fast the background drifts"
+            value={appear.auroraSpeed} {...APPEARANCE_RANGES.auroraSpeed}
+            display={`${appear.auroraSpeed}%`} onChange={(v) => setAppear({ auroraSpeed: v })}
           />
           <Slider
             label="Bounciness" hint="Spring in hovers & pops"
