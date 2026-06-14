@@ -118,34 +118,52 @@ export function Bookshelf() {
     );
   }
 
-  // ---- the shelf: three closed tomes ----
+  // Rack the volumes (plus the trailing "Add volume" tile) onto shelves of at
+  // most six, so a seventh book starts a fresh shelf above.
+  type Slot = { kind: 'book'; vol: Volume; delay: number } | { kind: 'add' };
+  const slots: Slot[] = volumes.map((vol, i) => ({ kind: 'book', vol, delay: (i % BOOKS_PER_SHELF) * 0.08 }));
+  slots.push({ kind: 'add' });
+  const shelves: Slot[][] = [];
+  for (let i = 0; i < slots.length; i += BOOKS_PER_SHELF) shelves.push(slots.slice(i, i + BOOKS_PER_SHELF));
+
+  // ---- the shelf: closed tomes, racked six to a plank ----
   return (
-    <div style={{ height: '100%', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '40px 24px 70px' }}>
+    <div style={{ height: '100%', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: shelves.length > 1 ? 'flex-start' : 'center', alignItems: 'center', padding: '40px 24px 70px' }}>
       <div style={{ textAlign: 'center', marginBottom: 34 }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 32, margin: 0, color: 'var(--ink)' }}>Codex</h1>
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink-3)', marginTop: 6 }}>Choose a volume to open.</p>
       </div>
 
-      <div style={{ display: 'flex', gap: 20, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
-        {volumes.map((vol, i) => (
-          <BookSpine key={vol.id} shelf={vol} count={countFor(vol)} delay={i * 0.08} onOpen={() => setOpenId(vol.id)} />
+      {/* Books are racked onto shelves of up to six; extra books start a new
+          shelf stacked above, and each plank only spans the books on it. */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 26 }}>
+        {shelves.map((row, ri) => (
+          <div key={ri} style={{ display: 'inline-flex', flexDirection: 'column', maxWidth: '100%' }}>
+            <div style={{ display: 'flex', gap: 20, alignItems: 'flex-end', justifyContent: 'center', padding: '0 18px' }}>
+              {row.map((slot) =>
+                slot.kind === 'add' ? (
+                  <div
+                    key="__add"
+                    onClick={createVolume}
+                    title="Add a volume"
+                    style={{
+                      width: 132, height: BOOK_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7,
+                      border: '1.5px dashed var(--line-2)', borderRadius: 11, color: 'var(--ink-3)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 12, textAlign: 'center', flex: '0 0 auto',
+                    }}
+                  >
+                    <Icon.Plus size={18} />
+                    Add<br />volume
+                  </div>
+                ) : (
+                  <BookSpine key={slot.vol.id} shelf={slot.vol} count={countFor(slot.vol)} delay={slot.delay} onOpen={() => setOpenId(slot.vol.id)} />
+                ),
+              )}
+            </div>
+            {/* this shelf's plank — width follows the books racked on it */}
+            <div style={{ width: '100%', height: 14, marginTop: 6, borderRadius: '3px', background: 'linear-gradient(var(--tan), var(--ink-3))', opacity: 0.5, boxShadow: '0 14px 26px rgba(0,0,0,.18)' }} />
+          </div>
         ))}
-        {/* add a new volume */}
-        <div
-          onClick={createVolume}
-          title="Add a volume"
-          style={{
-            width: 132, height: BOOK_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 7,
-            border: '1.5px dashed var(--line-2)', borderRadius: 11, color: 'var(--ink-3)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 12, textAlign: 'center',
-          }}
-        >
-          <Icon.Plus size={18} />
-          Add<br />volume
-        </div>
       </div>
-
-      {/* the shelf plank */}
-      <div style={{ width: 560, maxWidth: '86%', height: 14, marginTop: 6, borderRadius: '3px', background: 'linear-gradient(var(--tan), var(--ink-3))', opacity: 0.5, boxShadow: '0 14px 26px rgba(0,0,0,.18)' }} />
 
       {hasHiddenDefaults() && (
         <span
@@ -161,6 +179,7 @@ export function Bookshelf() {
 
 const BOOK_W = 172;
 const BOOK_H = 232;
+const BOOKS_PER_SHELF = 6;
 
 // A plain front-facing book cover. Hovering lifts and tilts it slightly;
 // clicking opens it into the entries view.
