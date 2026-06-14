@@ -35,7 +35,6 @@ const NAV: Array<{ id: ReturnType<typeof Object.keys>[number]; label: string; ic
   { id: 'codex', label: 'Codex', icon: 'Codex' },
   { id: 'timeline', label: 'Timeline', icon: 'Timeline' },
   { id: 'map', label: 'Map', icon: 'Map' },
-  { id: 'settings', label: 'Settings', icon: 'Settings' },
 ] as any;
 
 interface MenuState {
@@ -44,7 +43,7 @@ interface MenuState {
   node: Page;
 }
 
-export function Sidebar() {
+export function Sidebar({ open = true, compact = false }: { open?: boolean; compact?: boolean }) {
   const store = useStore();
   const { view, pages, entities, expanded, chapterId, pageId, entityId } = store;
 
@@ -309,15 +308,31 @@ export function Sidebar() {
     <aside
       className="glass"
       style={{
-        width,
-        flex: '0 0 auto',
         display: 'flex',
         flexDirection: 'column',
         background: 'var(--surface)',
         borderRight: '1px solid var(--line)',
-        position: 'relative',
         overflow: 'hidden',
-        zIndex: 20,
+        // The retract: inline it collapses its width to 0; floating (compact)
+        // it slides off to the left. Either way it eases out slowly.
+        transition: 'width .42s cubic-bezier(.4,0,.2,1), transform .42s cubic-bezier(.4,0,.2,1)',
+        ...(compact
+          ? {
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              width,
+              zIndex: 41,
+              transform: open ? 'translateX(0)' : 'translateX(-100%)',
+              boxShadow: open ? '0 0 44px rgba(0,0,0,.28)' : 'none',
+            }
+          : {
+              position: 'relative',
+              flex: '0 0 auto',
+              width: open ? width : 0,
+              zIndex: 20,
+            }),
       }}
     >
       {/* aurora / mist background */}
@@ -352,7 +367,7 @@ export function Sidebar() {
         />
       </div>
 
-      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, width, flex: '0 0 auto' }}>
         {/* nav */}
         <nav style={{ padding: '12px 10px 6px', display: 'flex', flexDirection: 'column', gap: 2 }}>
           {NAV.map((n) => {
@@ -497,6 +512,32 @@ export function Sidebar() {
               </div>
             );
           })}
+        </div>
+
+        {/* settings pinned to the bottom */}
+        <div style={{ flex: '0 0 auto', borderTop: '1px solid var(--line)', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <button
+            onClick={() => store.setView('settings')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 11,
+              height: 34,
+              padding: '0 11px',
+              border: 'none',
+              borderRadius: 9,
+              background: view === 'settings' ? 'var(--clay-soft)' : 'transparent',
+              color: view === 'settings' ? 'var(--clay)' : 'var(--ink-2)',
+              fontFamily: 'var(--font-ui)',
+              fontSize: 13,
+              fontWeight: view === 'settings' ? 600 : 500,
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            <Icon.Settings size={17} />
+            Settings
+          </button>
         </div>
       </div>
 

@@ -47,18 +47,23 @@ export function AppShell() {
       <Header />
 
       <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}>
-        {/* compact: scrim behind the floating sidebar */}
-        {compact && showSidebar && (
-          <div onClick={toggleSidebar} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.34)', zIndex: 40 }} />
+        {/* compact: scrim behind the floating sidebar — fades with the panel */}
+        {compact && !focus && (
+          <div
+            onClick={toggleSidebar}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(0,0,0,0.34)',
+              zIndex: 40,
+              opacity: showSidebar ? 1 : 0,
+              pointerEvents: showSidebar ? 'auto' : 'none',
+              transition: 'opacity .42s ease',
+            }}
+          />
         )}
-        {showSidebar &&
-          (compact ? (
-            <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, zIndex: 41, display: 'flex', animation: 'panelin .25s ease' }}>
-              <Sidebar />
-            </div>
-          ) : (
-            <Sidebar />
-          ))}
+        {/* The sidebar stays mounted so it can animate in/out; it retracts itself. */}
+        {!focus && <Sidebar open={showSidebar} compact={compact} />}
 
         <main style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex', flexDirection: 'column', background: canvasBg, overflow: 'hidden' }}>
           {(view === 'editor' || view === 'lore') && <EditorView />}
