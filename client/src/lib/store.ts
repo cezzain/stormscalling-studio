@@ -61,6 +61,7 @@ interface StoreState {
   selectChapter: (chapterId: string) => void;
   selectSection: (section: 'manuscript' | 'lore') => void;
   selectEntity: (entityId: string) => void;
+  openCodexShelf: () => void;
 
   createPage: (data: Partial<Page>) => Promise<Page>;
   duplicatePage: (id: string) => Promise<Page>;
@@ -241,6 +242,8 @@ export const useStore = create<StoreState>((set, get) => ({
     else set({ view, chapterId: null, pageId: null });
   },
   selectEntity: (entityId) => set({ view: 'codex', entityId }),
+  // Open the Codex on the bookshelf landing (no entry selected).
+  openCodexShelf: () => set({ view: 'codex', entityId: null }),
 
   createPage: async (data) => {
     const page = await api.pages.create(data);

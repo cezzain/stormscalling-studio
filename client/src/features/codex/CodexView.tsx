@@ -3,6 +3,7 @@ import { useStore } from '../../lib/store';
 import { api } from '../../lib/api';
 import { Icon } from '../../lib/icons';
 import { CodexBodyEditor } from './CodexBodyEditor';
+import { Bookshelf } from './Bookshelf';
 import type { Entity, EntityType, Backlink } from '../../lib/types';
 
 const TYPES: EntityType[] = ['character', 'nation', 'location', 'faction', 'concept'];
@@ -11,6 +12,7 @@ export function CodexView() {
   const { entityId, entities } = useStore();
   const refreshEntities = useStore((s) => s.refreshEntities);
   const selectPage = useStore((s) => s.selectPage);
+  const openCodexShelf = useStore((s) => s.openCodexShelf);
   const [entity, setEntity] = useState<Entity | null>(null);
   const [backlinks, setBacklinks] = useState<Backlink[]>([]);
   const [editingName, setEditingName] = useState(false);
@@ -34,16 +36,9 @@ export function CodexView() {
       .catch(() => setEntity(null));
   }, [entityId]);
 
-  if (!entity) {
-    return (
-      <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--ink-3)', fontFamily: 'var(--font-body)', fontSize: 15 }}>
-        <div style={{ textAlign: 'center', maxWidth: 420 }}>
-          <Icon.Codex size={34} style={{ color: 'var(--ink-3)' }} />
-          <p style={{ marginTop: 14 }}>Your Codex is empty. Add a character, place, faction, or concept with the “+” beside CODEX in the sidebar — or type @ while writing to create one inline.</p>
-        </div>
-      </div>
-    );
-  }
+  // No entry selected → show the bookshelf landing (three volumes to open).
+  if (!entityId) return <Bookshelf />;
+  if (!entity) return null;
 
   const save = async (patch: Partial<Entity>) => {
     const updated = await api.entities.update(entity.id, patch);
@@ -63,6 +58,16 @@ export function CodexView() {
   return (
     <div style={{ height: '100%', overflowY: 'auto', display: 'flex', justifyContent: 'center', padding: '40px 24px 80px' }}>
       <div style={{ width: '100%', maxWidth: 760 }}>
+        <button
+          onClick={() => openCodexShelf()}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 7, height: 32, padding: '0 13px', marginBottom: 18,
+            border: '1px solid var(--line)', borderRadius: 9, background: 'var(--surface-2)',
+            color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'var(--font-ui)', fontSize: 12.5, fontWeight: 500,
+          }}
+        >
+          <Icon.Chevron size={11} style={{ transform: 'rotate(90deg)' }} /> Bookshelf
+        </button>
         <div style={{ display: 'flex', gap: 26, marginBottom: 30 }}>
           {/* cover */}
           <div

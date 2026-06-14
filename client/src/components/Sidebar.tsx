@@ -364,6 +364,7 @@ export function Sidebar() {
                 onClick={() => {
                   if (n.id === 'editor') store.selectSection('manuscript');
                   else if (n.id === 'lore') store.selectSection('lore');
+                  else if (n.id === 'codex') store.openCodexShelf();
                   else store.setView(n.id as any);
                 }}
                 style={{

@@ -422,3 +422,8 @@
   0%, 100% { opacity: 1 }
   50%      { opacity: 0 }
 }
+/* Codex bookshelf — the cover swinging open to reveal the pages. */
+@keyframes bookOpen {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(-152deg); }
+}
