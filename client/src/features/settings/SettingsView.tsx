@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useStore } from '../../lib/store';
 import { api } from '../../lib/api';
 import { THEMES } from '../../lib/themes';
@@ -50,6 +50,25 @@ export function SettingsView() {
     const a = document.createElement('a');
     a.href = url;
     a.click();
+  };
+
+  const importRef = useRef<HTMLInputElement | null>(null);
+  const [importing, setImporting] = useState(false);
+  const runImport = async (file: File) => {
+    const ok = window.confirm(
+      `Import "${file.name}"?\n\nThis REPLACES your current database${/\.zip$/i.test(file.name) ? ' and images' : ''}. ` +
+        'Export a backup first if you might want to keep what you have. The app will reload when done.',
+    );
+    if (!ok) return;
+    setImporting(true);
+    try {
+      await api.importBackup(file);
+      // Reload against the freshly restored database.
+      window.location.reload();
+    } catch (err: any) {
+      setImporting(false);
+      window.alert(`Import failed: ${err?.message ?? 'unknown error'}`);
+    }
   };
 
   return (
@@ -160,6 +179,22 @@ export function SettingsView() {
           </Row>
           <Row label="Codex" hint="Export all entries as a Markdown zip">
             <button onClick={() => download(api.exportUrls.codex())} className="glass-btn" style={btnStyle}>Export →</button>
+          </Row>
+          <Row label="Import" hint="Restore from a backup .zip or a .db file (replaces current data)">
+            <input
+              ref={importRef}
+              type="file"
+              accept=".zip,.db,.sqlite,application/zip,application/x-sqlite3"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = '';
+                if (f) runImport(f);
+              }}
+            />
+            <button onClick={() => importRef.current?.click()} disabled={importing} className="glass-btn" style={{ ...btnStyle, opacity: importing ? 0.6 : 1, cursor: importing ? 'default' : 'pointer' }}>
+              {importing ? 'Importing…' : '← Import'}
+            </button>
           </Row>
         </Section>
       </div>

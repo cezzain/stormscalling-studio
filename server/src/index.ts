@@ -19,6 +19,7 @@ import { mapsRouter } from './routes/maps.js';
 import { searchRouter } from './routes/search.js';
 import { versionsRouter } from './routes/versions.js';
 import { exportRouter } from './routes/export.js';
+import { importRouter } from './routes/import.js';
 
 // Resilience: never let a stray error take the whole API process down — log it
 // and keep serving. The editor and data layer stay available no matter what.
@@ -59,6 +60,7 @@ app.use('/api/maps', mapsRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/versions', versionsRouter);
 app.use('/api/export', exportRouter);
+app.use('/api/import', importRouter);
 
 // Serve the built client in production (single-port deployment).
 const clientDist = path.join(PROJECT_ROOT, 'client', 'dist');

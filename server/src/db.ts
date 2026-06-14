@@ -6,10 +6,17 @@ import { DATA_DIR, IMAGES_DIR, DB_PATH, DEFAULT_SYSTEM_PROMPT, DEFAULT_CALENDAR 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(IMAGES_DIR, { recursive: true });
 
-export const db = new Database(DB_PATH);
-db.pragma('journal_mode = WAL');
-db.pragma('synchronous = NORMAL');
-db.pragma('foreign_keys = ON');
+function openConnection(): Database.Database {
+  const d = new Database(DB_PATH);
+  d.pragma('journal_mode = WAL');
+  d.pragma('synchronous = NORMAL');
+  d.pragma('foreign_keys = ON');
+  return d;
+}
+
+// `let` (not `const`) so a restore/import can swap the connection at runtime.
+// ESM live bindings mean every module that imports `db` sees the new handle.
+export let db = openConnection();
 
 // ---------------------------------------------------------------------------
 // Schema — idempotent. Covers every milestone's tables up front so no
@@ -147,8 +154,6 @@ CREATE TABLE IF NOT EXISTS versions (
 CREATE INDEX IF NOT EXISTS idx_versions_page ON versions(page_id, created_at);
 `;
 
-db.exec(SCHEMA);
-
 // ---------------------------------------------------------------------------
 // Lightweight migrations — for databases created before a column existed.
 // CREATE TABLE IF NOT EXISTS won't add new columns to an existing table, so
@@ -158,8 +163,10 @@ function hasColumn(table: string, column: string): boolean {
   const cols = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
   return cols.some((c) => c.name === column);
 }
-if (!hasColumn('pages', 'section')) {
-  db.exec("ALTER TABLE pages ADD COLUMN section TEXT NOT NULL DEFAULT 'manuscript'");
+function migrate() {
+  if (!hasColumn('pages', 'section')) {
+    db.exec("ALTER TABLE pages ADD COLUMN section TEXT NOT NULL DEFAULT 'manuscript'");
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -222,6 +229,30 @@ function seed() {
 
   setSetting('seeded', '1');
 }
-seed();
+
+// Apply schema + migrations + seed to the current connection. Idempotent, so
+// it's safe to run on first boot and again after a restore swaps the file.
+function prepare() {
+  db.exec(SCHEMA);
+  migrate();
+  seed();
+}
+prepare();
+
+/** Close the live connection (e.g. before overwriting the db file on restore). */
+export function closeDatabase() {
+  try {
+    db.close();
+  } catch {
+    /* already closed */
+  }
+}
+
+/** Re-open the db file into a fresh connection and re-apply schema/seed. */
+export function reopenDatabase() {
+  closeDatabase();
+  db = openConnection();
+  prepare();
+}
 
 export { getSetting, setSetting };

@@ -88,6 +88,24 @@ export const api = {
     return res.json();
   },
 
+  // ---- import / restore (a .db file or a backup .zip) ----
+  importBackup: async (file: File): Promise<{ ok: true }> => {
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch(BASE + '/import', { method: 'POST', body: form, credentials: 'same-origin' });
+    if (!res.ok) {
+      let detail = 'import failed';
+      try {
+        const body = await res.json();
+        detail = body.detail || body.error || detail;
+      } catch {
+        /* non-JSON error */
+      }
+      throw new Error(detail);
+    }
+    return res.json();
+  },
+
   // ---- chat ----
   chat: {
     threads: () => j<ChatThread[]>('/chat/threads'),
