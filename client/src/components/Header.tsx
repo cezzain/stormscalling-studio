@@ -140,7 +140,7 @@ export function Header() {
           {themeOpen && (
             <div
               className="glass"
-              style={{ position: 'absolute', top: 38, right: 0, zIndex: 80, width: 184, padding: 6, border: '1px solid var(--line-2)', borderRadius: 11, fontFamily: 'var(--font-ui)' }}
+              style={{ position: 'absolute', top: 38, right: 0, zIndex: 200, width: 184, padding: 6, border: '1px solid var(--line-2)', borderRadius: 11, fontFamily: 'var(--font-ui)' }}
             >
               <div style={{ padding: '4px 10px 6px', fontSize: 10, letterSpacing: 1, color: 'var(--ink-3)', fontWeight: 600 }}>COLOUR SCHEME</div>
               {THEMES.map((t) => (
