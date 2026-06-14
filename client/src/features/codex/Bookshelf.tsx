@@ -128,48 +128,85 @@ export function Bookshelf() {
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink-3)', marginTop: 6 }}>Choose a volume to open.</p>
       </div>
 
-      <div style={{ display: 'flex', gap: 38, alignItems: 'flex-end' }}>
+      <div style={{ display: 'flex', gap: 20, alignItems: 'center', justifyContent: 'center' }}>
         {SHELVES.map((shelf, i) => (
           <BookSpine key={shelf.id} shelf={shelf} count={countFor(shelf)} delay={i * 0.08} onOpen={() => setOpenId(shelf.id)} />
         ))}
       </div>
 
       {/* the shelf plank */}
-      <div style={{ width: 640, maxWidth: '88%', height: 14, marginTop: -2, borderRadius: '3px', background: 'linear-gradient(var(--tan), var(--ink-3))', opacity: 0.5, boxShadow: '0 14px 26px rgba(0,0,0,.18)' }} />
+      <div style={{ width: 460, maxWidth: '82%', height: 14, marginTop: 6, borderRadius: '3px', background: 'linear-gradient(var(--tan), var(--ink-3))', opacity: 0.5, boxShadow: '0 14px 26px rgba(0,0,0,.18)' }} />
     </div>
   );
 }
 
+const COVER_W = 156;
+const BOOK_H = 232;
+const DEPTH = 46;
+
+// A 3D book standing spine-out on the shelf. At rest you see the spine; on
+// hover it swings a little to reveal the cover; clicking opens it fully.
 function BookSpine({ shelf, count, delay, onOpen }: { shelf: Shelf; count: number; delay: number; onOpen: () => void }) {
   const [hover, setHover] = useState(false);
+  // rotateY: 76° ≈ spine to camera, 26° ≈ cover cracked open toward viewer.
+  const rot = hover ? 26 : 76;
+  const faceBase: React.CSSProperties = { position: 'absolute', left: '50%', top: '50%', backfaceVisibility: 'hidden' };
   return (
-    <div style={{ perspective: 1100, animation: `fadeup .5s ${delay}s both` }}>
+    <div style={{ perspective: 1400, width: DEPTH + 26, height: BOOK_H, animation: `fadeup .5s ${delay}s both` }}>
       <div
         onClick={onOpen}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         title={`Open ${shelf.label}`}
         style={{
-          position: 'relative', width: 172, height: 232, cursor: 'pointer',
-          borderRadius: '4px 11px 11px 4px', background: shelf.cover,
-          boxShadow: hover ? '0 22px 40px rgba(0,0,0,.28)' : 'var(--shadow)',
-          transform: hover ? 'translateY(-8px) rotateY(-14deg)' : 'translateY(0) rotateY(-3deg)',
-          transformOrigin: 'left center', transition: 'transform .4s var(--spring, ease), box-shadow .35s ease',
-          display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px 18px',
+          position: 'relative', width: COVER_W, height: BOOK_H, cursor: 'pointer',
+          transformStyle: 'preserve-3d',
+          transform: `translateX(${(DEPTH - COVER_W) / 2 + 13}px) translateY(${hover ? -10 : 0}px) rotateY(${rot}deg)`,
+          transition: 'transform .55s var(--spring, ease)',
+          filter: hover ? 'drop-shadow(0 22px 30px rgba(0,0,0,.34))' : 'drop-shadow(0 12px 20px rgba(0,0,0,.22))',
         }}
       >
-        {/* spine highlight */}
-        <div style={{ position: 'absolute', left: 9, top: 0, bottom: 0, width: 3, background: 'rgba(0,0,0,.22)', borderRadius: 2 }} />
-        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 6, background: 'rgba(255,255,255,.12)', borderRadius: '0 11px 11px 0' }} />
-        <div style={{ fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: 1.5, color: 'rgba(255,255,255,.7)', fontWeight: 600 }}>VOLUME</div>
-        <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 23, lineHeight: 1.1, color: '#F5EEDF' }}>{shelf.label}</div>
-          <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.72)', marginTop: 7 }}>{shelf.subtitle}</div>
+        {/* COVER — wide front face */}
+        <div
+          style={{
+            ...faceBase, width: COVER_W, height: BOOK_H, marginLeft: -COVER_W / 2, marginTop: -BOOK_H / 2,
+            transform: `translateZ(${DEPTH / 2}px)`, background: shelf.cover, borderRadius: '3px 11px 11px 3px',
+            padding: '22px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ position: 'absolute', left: 8, top: 10, bottom: 10, width: 3, background: 'rgba(0,0,0,.2)', borderRadius: 2 }} />
+          <div style={{ fontFamily: 'var(--font-ui)', fontSize: 10, letterSpacing: 1.5, color: 'rgba(255,255,255,.7)', fontWeight: 600 }}>VOLUME</div>
+          <div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 23, lineHeight: 1.1, color: '#F5EEDF' }}>{shelf.label}</div>
+            <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.72)', marginTop: 7 }}>{shelf.subtitle}</div>
+          </div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'rgba(255,255,255,.85)' }}>
+            <span style={{ minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10, background: 'rgba(0,0,0,.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>{count}</span>
+            {count === 1 ? 'entry' : 'entries'}
+          </div>
         </div>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'rgba(255,255,255,.85)' }}>
-          <span style={{ minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10, background: 'rgba(0,0,0,.22)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>{count}</span>
-          {count === 1 ? 'entry' : 'entries'}
+
+        {/* SPINE — narrow left face, title runs vertically */}
+        <div
+          style={{
+            ...faceBase, width: DEPTH, height: BOOK_H, marginLeft: -DEPTH / 2, marginTop: -BOOK_H / 2,
+            transform: `rotateY(-90deg) translateZ(${COVER_W / 2}px)`, background: shelf.cover, filter: 'brightness(.86)',
+            borderRadius: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: 'inset 2px 0 6px rgba(0,0,0,.25), inset -2px 0 6px rgba(0,0,0,.25)',
+          }}
+        >
+          <span style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontFamily: 'var(--font-display)', fontSize: 16, letterSpacing: 1, color: '#F5EEDF', whiteSpace: 'nowrap' }}>{shelf.label}</span>
         </div>
+
+        {/* PAGES — right edge */}
+        <div
+          style={{
+            ...faceBase, width: DEPTH, height: BOOK_H - 8, marginLeft: -DEPTH / 2, marginTop: -(BOOK_H - 8) / 2,
+            transform: `rotateY(90deg) translateZ(${COVER_W / 2}px)`,
+            background: 'repeating-linear-gradient(90deg, var(--surface), var(--surface) 2px, var(--surface-2) 2px, var(--surface-2) 4px)',
+            borderRadius: 2,
+          }}
+        />
       </div>
     </div>
   );
