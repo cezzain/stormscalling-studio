@@ -10,6 +10,7 @@ export function Header() {
   const setTheme = useStore((s) => s.setTheme);
   const toggleFocus = useStore((s) => s.toggleFocus);
   const toggleChat = useStore((s) => s.toggleChat);
+  const toggleSidebar = useStore((s) => s.toggleSidebar);
   const openSearch = useStore((s) => s.openSearch);
   const saving = useEditorUi((s) => s.saving);
   const { authRequired, logout } = useSession();
@@ -58,7 +59,15 @@ export function Header() {
         zIndex: 30,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 210, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+        <button
+          onClick={toggleSidebar}
+          title="Toggle sidebar"
+          aria-label="Toggle sidebar"
+          style={{ ...btn, width: 34, height: 34, fontSize: 17, lineHeight: 1 }}
+        >
+          ☰
+        </button>
         <div
           style={{
             width: 30,

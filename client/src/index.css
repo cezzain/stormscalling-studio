@@ -10,11 +10,45 @@
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; padding: 0; height: 100%; }
 
+/* iPadOS / iOS: hold the text size steady (no auto-inflation in landscape),
+   kill the grey tap flash, and stop rubber-band overscroll bouncing the app. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   background: var(--canvas);
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
   color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Tappable chrome shouldn't be text-selectable or trigger the 300ms zoom
+   delay; the manuscript, codex bodies, and inputs stay fully selectable. */
+button, [role='button'], .mention, nav, header, aside, label, select {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+input, textarea, [contenteditable], .manuscript, .ProseMirror {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* Smooth, momentum scrolling everywhere it scrolls. */
+[data-editor-scroll], aside, main { -webkit-overflow-scrolling: touch; }
+
+/* Respect the iPad/iPhone safe areas when installed to the home screen. */
+header { padding-top: env(safe-area-inset-top, 0px); }
+
+/* Hover lifts only on devices that actually hover (desktop, Apple Pencil) —
+   never leave a touch tap stuck in a hover state on a finger-only screen. */
+@media (hover: none) {
+  *:hover { transition: none; }
 }
 
 ::selection { background: var(--clay-soft); }

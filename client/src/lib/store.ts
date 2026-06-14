@@ -15,6 +15,7 @@ interface StoreState {
   view: View;
   focus: boolean;
   chatOpen: boolean;
+  sidebarOpen: boolean;
   searchOpen: boolean;
   typewriter: boolean;
 
@@ -44,6 +45,7 @@ interface StoreState {
   setView: (v: View) => void;
   toggleFocus: () => void;
   toggleChat: () => void;
+  toggleSidebar: () => void;
   toggleTheme: () => void;
   setTheme: (t: string) => void;
   toggleTypewriter: () => void;
@@ -89,7 +91,10 @@ export const useStore = create<StoreState>((set, get) => ({
   theme: localStorage.getItem(THEME_KEY) || 'light',
   view: 'editor',
   focus: false,
-  chatOpen: true,
+  // On smaller (iPad-ish) screens start with the chat closed and the sidebar
+  // collapsed so the writing surface gets the room.
+  chatOpen: typeof window !== 'undefined' ? window.innerWidth > 1100 : true,
+  sidebarOpen: typeof window !== 'undefined' ? window.innerWidth >= 1000 : true,
   searchOpen: false,
   typewriter: false,
   pages: [],
@@ -167,6 +172,7 @@ export const useStore = create<StoreState>((set, get) => ({
   setView: (v) => set({ view: v }),
   toggleFocus: () => set((s) => ({ focus: !s.focus })),
   toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
+  toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   toggleTheme: () => {
     const next = get().theme === 'dark' ? 'light' : 'dark';
     applyTheme(next);

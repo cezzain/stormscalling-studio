@@ -14,17 +14,25 @@ import { SettingsView } from '../features/settings/SettingsView';
 import { ChatPanel } from '../features/chat/ChatPanel';
 
 export function AppShell() {
-  const { view, focus, chatOpen, theme } = useStore();
+  const { view, focus, chatOpen, sidebarOpen, theme } = useStore();
+  const toggleSidebar = useStore((s) => s.toggleSidebar);
   const [narrow, setNarrow] = useState(window.innerWidth < 1200);
+  const [compact, setCompact] = useState(window.innerWidth < 1000);
 
   useEffect(() => {
-    const onResize = () => setNarrow(window.innerWidth < 1200);
+    const onResize = () => {
+      setNarrow(window.innerWidth < 1200);
+      setCompact(window.innerWidth < 1000);
+    };
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
   const canvasBg = focus ? (isDarkTheme(theme) ? 'rgba(10,13,10,0.6)' : 'rgba(222,212,194,0.5)') : 'transparent';
   const showChat = chatOpen && !focus;
+  // On compact (iPad-portrait-ish) widths the sidebar floats over the canvas;
+  // on wider screens it sits inline in the layout.
+  const showSidebar = !focus && (compact ? sidebarOpen : true);
 
   return (
     <div
@@ -43,7 +51,18 @@ export function AppShell() {
       <Header />
 
       <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}>
-        {!focus && <Sidebar />}
+        {/* compact: scrim behind the floating sidebar */}
+        {compact && showSidebar && (
+          <div onClick={toggleSidebar} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.34)', zIndex: 40 }} />
+        )}
+        {showSidebar &&
+          (compact ? (
+            <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, zIndex: 41, display: 'flex', animation: 'panelin .25s ease' }}>
+              <Sidebar />
+            </div>
+          ) : (
+            <Sidebar />
+          ))}
 
         <main style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex', flexDirection: 'column', background: canvasBg, overflow: 'hidden' }}>
           {(view === 'editor' || view === 'lore') && <EditorView />}
