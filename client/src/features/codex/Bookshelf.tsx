@@ -154,7 +154,7 @@ function BookSpine({ shelf, count, delay, onOpen }: { shelf: Shelf; count: numbe
           borderRadius: '4px 11px 11px 4px', background: shelf.cover,
           boxShadow: hover ? '0 22px 40px rgba(0,0,0,.28)' : 'var(--shadow)',
           transform: hover ? 'translateY(-8px) rotateY(-14deg)' : 'translateY(0) rotateY(-3deg)',
-          transformOrigin: 'left center', transition: 'transform .35s ease, box-shadow .35s ease',
+          transformOrigin: 'left center', transition: 'transform .4s var(--spring, ease), box-shadow .35s ease',
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px 18px',
         }}
       >
@@ -176,13 +176,18 @@ function BookSpine({ shelf, count, delay, onOpen }: { shelf: Shelf; count: numbe
 }
 
 function EntityCard({ entity, onOpen }: { entity: Entity; onOpen: () => void }) {
+  const [hover, setHover] = useState(false);
   return (
     <div
       onClick={onOpen}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       className="glass"
       style={{
         display: 'flex', alignItems: 'center', gap: 12, padding: 11, borderRadius: 13,
         border: '1px solid var(--line)', background: 'var(--surface)', cursor: 'pointer', boxShadow: 'var(--shadow-s)',
+        transform: hover ? 'translateY(-3px) scale(1.025)' : 'none',
+        transition: 'transform .4s var(--spring, ease)',
       }}
     >
       <div

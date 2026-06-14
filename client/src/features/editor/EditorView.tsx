@@ -100,7 +100,7 @@ export function EditorView() {
           ...( { '--ms-font': fontVar, '--ms-size': sizeVar } as React.CSSProperties),
         }}
       >
-        <div style={{ width: '100%', maxWidth: 880 }}>
+        <div style={{ width: '100%', maxWidth: 'var(--ms-width, 880px)' }}>
           {container ? (
             <>
               {/* chapter / page header */}

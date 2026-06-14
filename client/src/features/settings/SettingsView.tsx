@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react';
 import { useStore } from '../../lib/store';
 import { api } from '../../lib/api';
 import { THEMES } from '../../lib/themes';
+import {
+  type Appearance,
+  APPEARANCE_DEFAULTS,
+  APPEARANCE_RANGES,
+  applyAppearance,
+  loadAppearance,
+  saveAppearance,
+} from '../../lib/appearance';
 
 const FONTS = ['Lora', 'IM Fell English', 'Inter'];
 
@@ -25,6 +33,21 @@ export function SettingsView() {
     await api.settings.update({ [`model_${provider}`]: value });
     await refreshAi();
   };
+  const [appear, setAppearState] = useState<Appearance>(loadAppearance);
+  const setAppear = (patch: Partial<Appearance>) => {
+    setAppearState((prev) => {
+      const next = { ...prev, ...patch };
+      applyAppearance(next);
+      saveAppearance(next);
+      return next;
+    });
+  };
+  const resetAppear = () => {
+    applyAppearance(APPEARANCE_DEFAULTS);
+    saveAppearance(APPEARANCE_DEFAULTS);
+    setAppearState({ ...APPEARANCE_DEFAULTS });
+  };
+
   const [seasons, setSeasons] = useState((calendar?.seasons ?? []).join(', '));
   const [calFormat, setCalFormat] = useState(calendar?.format ?? 'Year [N] · [Season]');
   const [year, setYear] = useState(String(calendar?.currentYear ?? 312));
@@ -113,6 +136,37 @@ export function SettingsView() {
           </Row>
         </Section>
 
+        <Section title="Appearance">
+          <Slider
+            label="Glass clarity" hint="Frosted ↔ crystal clear"
+            value={appear.clarity} {...APPEARANCE_RANGES.clarity}
+            display={`${appear.clarity}%`} onChange={(v) => setAppear({ clarity: v })}
+          />
+          <Slider
+            label="Background glow" hint="Ambient aurora intensity"
+            value={appear.glow} {...APPEARANCE_RANGES.glow}
+            display={`${appear.glow}%`} onChange={(v) => setAppear({ glow: v })}
+          />
+          <Slider
+            label="Bounciness" hint="Spring in hovers & pops"
+            value={appear.bounce} {...APPEARANCE_RANGES.bounce}
+            display={`${appear.bounce}%`} onChange={(v) => setAppear({ bounce: v })}
+          />
+          <Slider
+            label="Writing width" hint="Manuscript column width"
+            value={appear.msWidth} {...APPEARANCE_RANGES.msWidth}
+            display={`${appear.msWidth}px`} onChange={(v) => setAppear({ msWidth: v })}
+          />
+          <Slider
+            label="Line spacing" hint="Manuscript leading"
+            value={appear.msLine} {...APPEARANCE_RANGES.msLine}
+            display={appear.msLine.toFixed(2)} onChange={(v) => setAppear({ msLine: v })}
+          />
+          <Row label="Restore defaults" hint="Reset every appearance slider">
+            <button onClick={resetAppear} style={btnStyle}>Reset</button>
+          </Row>
+        </Section>
+
         <Section title="World">
           <Row label="Calendar format" hint="Used across the timeline">
             <input value={calFormat} onChange={(e) => setCalFormat(e.target.value)} onBlur={saveCalendar} style={inStyle('ui-monospace,monospace')} />
@@ -158,6 +212,25 @@ function Row({ label, hint, children, stacked }: { label: string; hint: string; 
       </div>
       {stacked ? children : <div style={{ flex: '0 0 auto' }}>{children}</div>}
     </div>
+  );
+}
+function Slider({
+  label, hint, value, min, max, step, display, onChange,
+}: {
+  label: string; hint: string; value: number; min: number; max: number; step: number;
+  display: string; onChange: (v: number) => void;
+}) {
+  return (
+    <Row label={label} hint={hint}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 230 }}>
+        <input
+          type="range" min={min} max={max} step={step} value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          style={{ flex: 1, accentColor: 'var(--clay)', cursor: 'pointer' }}
+        />
+        <span style={{ fontSize: 12, color: 'var(--ink-2)', minWidth: 48, textAlign: 'right', fontFamily: 'ui-monospace,monospace' }}>{display}</span>
+      </div>
+    </Row>
   );
 }
 function Value({ children, mono }: { children: React.ReactNode; mono?: boolean }) {

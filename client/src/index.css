@@ -79,7 +79,7 @@ body::before {
     radial-gradient(46% 48% at 52% 88%, var(--aurora-3), transparent 72%),
     radial-gradient(30% 34% at 72% 60%, var(--aurora-2), transparent 74%);
   filter: blur(64px) saturate(130%);
-  opacity: 0.58;
+  opacity: var(--aurora-opacity, 0.58);
   animation: aurora 44s ease-in-out infinite alternate;
 }
 /* secondary aurora — softer, counter-drifting, for parallax-like depth */
@@ -89,7 +89,7 @@ body::after {
     radial-gradient(40% 44% at 28% 72%, var(--aurora-3), transparent 72%),
     radial-gradient(36% 40% at 78% 12%, var(--aurora-1), transparent 74%);
   filter: blur(84px) saturate(120%);
-  opacity: 0.4;
+  opacity: var(--aurora-opacity-2, 0.4);
   animation: aurora2 62s ease-in-out infinite alternate;
 }
 @keyframes aurora {
@@ -109,7 +109,7 @@ body::after {
   outline: none;
   font-family: var(--ms-font, var(--font-body));
   font-size: var(--ms-size, 19px);
-  line-height: 1.82;
+  line-height: var(--ms-line, 1.82);
   color: var(--ink);
 }
 .manuscript .ProseMirror > * + * { margin-top: 0.9em; }
