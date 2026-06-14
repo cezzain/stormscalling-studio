@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useStore } from '../../lib/store';
 import { api } from '../../lib/api';
 import { Icon } from '../../lib/icons';
-import { type Volume, getVolumes, addVolume, removeVolume } from '../../lib/volumes';
+import { type Volume, getVolumes, addVolume, removeVolume, hasHiddenDefaults, restoreDefaultVolumes } from '../../lib/volumes';
 import type { Entity, EntityType } from '../../lib/types';
 
 export function Bookshelf() {
@@ -24,8 +24,26 @@ export function Bookshelf() {
     const name = window.prompt('Name your new volume (e.g. Magic, Beasts, Religions)');
     if (name && name.trim()) setVolumes(addVolume(name));
   };
-  const deleteVolume = (vol: Volume) => {
-    if (countFor(vol) > 0) return; // only empty custom volumes can be removed
+  const deleteVolume = async (vol: Volume) => {
+    const inVol = entities.filter((e) => vol.types.includes(e.type));
+    if (vol.custom) {
+      // Custom volume → delete the volume and the entries filed under it.
+      const msg = inVol.length
+        ? `Delete the "${vol.label}" volume and its ${inVol.length} ${inVol.length === 1 ? 'entry' : 'entries'}? This can't be undone.`
+        : `Delete the "${vol.label}" volume?`;
+      if (!window.confirm(msg)) return;
+      for (const e of inVol) {
+        try {
+          await api.entities.remove(e.id);
+        } catch {
+          /* ignore */
+        }
+      }
+      if (inVol.length) await refreshEntities();
+    } else {
+      // Built-in volume → just hide it; its entries stay in the codex.
+      if (!window.confirm(`Hide the "${vol.label}" volume? Its ${inVol.length} ${inVol.length === 1 ? 'entry' : 'entries'} stay in your codex and you can restore the volume later.`)) return;
+    }
     setVolumes(removeVolume(vol.id));
     setOpenId(null);
   };
@@ -73,9 +91,9 @@ export function Bookshelf() {
               <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 34, margin: '2px 0 2px', color: 'var(--ink)' }}>{shelf.label}</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
                 <span style={{ fontSize: 12.5, color: 'var(--ink-3)' }}>{items.length} {items.length === 1 ? 'entry' : 'entries'}</span>
-                {shelf.custom && items.length === 0 && (
-                  <span onClick={() => deleteVolume(shelf)} style={{ fontSize: 12, color: 'var(--danger)', cursor: 'pointer' }}>Delete volume</span>
-                )}
+                <span onClick={() => deleteVolume(shelf)} style={{ fontSize: 12, color: 'var(--danger)', cursor: 'pointer' }}>
+                  {shelf.custom ? 'Delete volume' : 'Hide volume'}
+                </span>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(168px, 1fr))', gap: 13 }}>
@@ -128,6 +146,15 @@ export function Bookshelf() {
 
       {/* the shelf plank */}
       <div style={{ width: 560, maxWidth: '86%', height: 14, marginTop: 6, borderRadius: '3px', background: 'linear-gradient(var(--tan), var(--ink-3))', opacity: 0.5, boxShadow: '0 14px 26px rgba(0,0,0,.18)' }} />
+
+      {hasHiddenDefaults() && (
+        <span
+          onClick={() => setVolumes(restoreDefaultVolumes())}
+          style={{ marginTop: 16, fontSize: 12, color: 'var(--ink-3)', cursor: 'pointer', textDecoration: 'underline' }}
+        >
+          Restore hidden volumes
+        </span>
+      )}
     </div>
   );
 }

@@ -30,10 +30,42 @@ const COVERS = [
 ];
 
 const KEY = 'scs-codex-volumes';
+const HIDDEN_KEY = 'scs-codex-hidden-volumes';
 
 function slug(s: string): string {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
+
+function loadHidden(): string[] {
+  try {
+    const raw = localStorage.getItem(HIDDEN_KEY);
+    if (raw) return JSON.parse(raw) as string[];
+  } catch {
+    /* ignore */
+  }
+  return [];
+}
+
+function saveHidden(ids: string[]) {
+  try {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(ids));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Built-in volumes the user has hidden (true if any are hidden). */
+export function hasHiddenDefaults(): boolean {
+  return loadHidden().length > 0;
+}
+
+/** Restore all hidden built-in volumes. */
+export function restoreDefaultVolumes(): Volume[] {
+  saveHidden([]);
+  return getVolumes();
+}
+
+const isDefault = (id: string) => DEFAULT_VOLUMES.some((v) => v.id === id);
 
 export function loadCustomVolumes(): Volume[] {
   try {
@@ -54,7 +86,8 @@ function saveCustomVolumes(v: Volume[]) {
 }
 
 export function getVolumes(): Volume[] {
-  return [...DEFAULT_VOLUMES, ...loadCustomVolumes()];
+  const hidden = loadHidden();
+  return [...DEFAULT_VOLUMES.filter((v) => !hidden.includes(v.id)), ...loadCustomVolumes()];
 }
 
 /** Add a custom volume and return the full volume list (defaults + custom). */
@@ -70,9 +103,16 @@ export function addVolume(label: string): Volume[] {
   return [...DEFAULT_VOLUMES, ...next];
 }
 
-/** Remove a custom volume by id and return the full volume list. */
+/**
+ * Remove a volume and return the full volume list. Custom volumes are deleted
+ * outright; built-in volumes are hidden (so they can be restored later).
+ */
 export function removeVolume(id: string): Volume[] {
-  const next = loadCustomVolumes().filter((v) => v.id !== id);
-  saveCustomVolumes(next);
-  return [...DEFAULT_VOLUMES, ...next];
+  if (isDefault(id)) {
+    const hidden = loadHidden();
+    if (!hidden.includes(id)) saveHidden([...hidden, id]);
+  } else {
+    saveCustomVolumes(loadCustomVolumes().filter((v) => v.id !== id));
+  }
+  return getVolumes();
 }
