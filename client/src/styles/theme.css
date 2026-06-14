@@ -28,12 +28,12 @@
   --shadow-s: 0 1px 2px rgba(43, 45, 34, .07);
   --shadow: 0 1px 2px rgba(43, 45, 34, .06), 0 10px 28px rgba(43, 45, 34, .09);
   /* ---- liquid glass ---- */
-  --glass: rgba(245, 240, 228, 0.52);
-  --glass-2: rgba(252, 249, 242, 0.66);
-  --glass-line: rgba(255, 255, 255, 0.45);
-  --glass-blur: 16px;
-  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .6), inset 0 0 0 1px rgba(255, 255, 255, .14), inset 0 -10px 24px rgba(43, 45, 34, .03);
-  --glass-shadow: 0 1px 2px rgba(43, 45, 34, .05), 0 14px 38px rgba(43, 45, 34, .14);
+  --glass: rgba(245, 240, 228, 0.50);
+  --glass-2: rgba(252, 249, 242, 0.64);
+  --glass-line: rgba(255, 255, 255, 0.55);
+  --glass-blur: 22px;
+  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .82), inset 0 0 0 1px rgba(255, 255, 255, .22), inset 0 -16px 32px rgba(43, 45, 34, .05), inset 0 10px 28px rgba(255, 255, 255, .30);
+  --glass-shadow: 0 1px 2px rgba(43, 45, 34, .06), 0 20px 52px rgba(43, 45, 34, .18);
   --aurora-1: rgba(46, 64, 48, 0.5);
   --aurora-2: rgba(168, 105, 60, 0.4);
   --aurora-3: rgba(126, 140, 110, 0.4);
@@ -66,12 +66,12 @@
   --shadow-s: 0 1px 2px rgba(0, 0, 0, .3);
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 34px rgba(0, 0, 0, .45);
   /* ---- liquid glass (dark) ---- */
-  --glass: rgba(28, 35, 27, 0.46);
-  --glass-2: rgba(40, 49, 42, 0.6);
-  --glass-line: rgba(255, 255, 255, 0.10);
-  --glass-blur: 18px;
-  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 0 0 1px rgba(255, 255, 255, .05), inset 0 -10px 26px rgba(0, 0, 0, .18);
-  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 16px 44px rgba(0, 0, 0, .55);
+  --glass: rgba(28, 35, 27, 0.45);
+  --glass-2: rgba(40, 49, 42, 0.58);
+  --glass-line: rgba(255, 255, 255, 0.16);
+  --glass-blur: 24px;
+  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 0 0 1px rgba(255, 255, 255, .07), inset 0 -16px 32px rgba(0, 0, 0, .26), inset 0 10px 26px rgba(255, 255, 255, .05);
+  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 22px 58px rgba(0, 0, 0, .62);
   --aurora-1: rgba(76, 108, 79, 0.55);
   --aurora-2: rgba(203, 142, 94, 0.42);
   --aurora-3: rgba(142, 161, 127, 0.4);
@@ -310,8 +310,8 @@
   --glass: rgba(40, 28, 30, 0.46);
   --glass-2: rgba(52, 38, 40, 0.6);
   --glass-line: rgba(255, 255, 255, 0.10);
-  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 0 0 1px rgba(255, 255, 255, .05), inset 0 -10px 26px rgba(0, 0, 0, .18);
-  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 16px 44px rgba(0, 0, 0, .55);
+  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 0 0 1px rgba(255, 255, 255, .07), inset 0 -16px 32px rgba(0, 0, 0, .26), inset 0 10px 26px rgba(255, 255, 255, .05);
+  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 22px 58px rgba(0, 0, 0, .62);
   --shadow-s: 0 1px 2px rgba(0, 0, 0, .3);
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 34px rgba(0, 0, 0, .45);
   --aurora-1: rgba(181, 82, 74, 0.5);
@@ -344,8 +344,8 @@
   --glass: rgba(24, 38, 42, 0.46);
   --glass-2: rgba(34, 50, 54, 0.6);
   --glass-line: rgba(255, 255, 255, 0.10);
-  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 0 0 1px rgba(255, 255, 255, .05), inset 0 -10px 26px rgba(0, 0, 0, .18);
-  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 16px 44px rgba(0, 0, 0, .55);
+  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 0 0 1px rgba(255, 255, 255, .07), inset 0 -16px 32px rgba(0, 0, 0, .26), inset 0 10px 26px rgba(255, 255, 255, .05);
+  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 22px 58px rgba(0, 0, 0, .62);
   --shadow-s: 0 1px 2px rgba(0, 0, 0, .3);
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 34px rgba(0, 0, 0, .45);
   --aurora-1: rgba(44, 110, 122, 0.5);
@@ -378,8 +378,8 @@
   --glass: rgba(34, 28, 42, 0.46);
   --glass-2: rgba(46, 38, 56, 0.6);
   --glass-line: rgba(255, 255, 255, 0.10);
-  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 0 0 1px rgba(255, 255, 255, .05), inset 0 -10px 26px rgba(0, 0, 0, .18);
-  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 16px 44px rgba(0, 0, 0, .55);
+  --glass-sheen: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 0 0 1px rgba(255, 255, 255, .07), inset 0 -16px 32px rgba(0, 0, 0, .26), inset 0 10px 26px rgba(255, 255, 255, .05);
+  --glass-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 22px 58px rgba(0, 0, 0, .62);
   --shadow-s: 0 1px 2px rgba(0, 0, 0, .3);
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 34px rgba(0, 0, 0, .45);
   --aurora-1: rgba(106, 74, 138, 0.5);

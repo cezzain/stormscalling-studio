@@ -35,51 +35,71 @@ button { font-family: inherit; }
    ========================================================================== */
 .glass {
   background: var(--glass) !important;
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(155%);
-  backdrop-filter: blur(var(--glass-blur)) saturate(155%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(175%) brightness(1.04);
+  backdrop-filter: blur(var(--glass-blur)) saturate(175%) brightness(1.04);
   box-shadow: var(--glass-sheen), var(--glass-shadow) !important;
 }
 .glass-2 {
   background: var(--glass-2) !important;
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(170%) brightness(1.03);
+  backdrop-filter: blur(var(--glass-blur)) saturate(170%) brightness(1.03);
   box-shadow: var(--glass-sheen), var(--glass-shadow) !important;
 }
 /* a softer inner-content glass (writing column) — frost only, keeps the
    element's own translucent background + shadow so text stays readable */
 .glass-soft {
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 6px)) saturate(135%);
-  backdrop-filter: blur(calc(var(--glass-blur) - 6px)) saturate(135%);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(145%);
+  backdrop-filter: blur(calc(var(--glass-blur) - 8px)) saturate(145%);
 }
 
 /* Header, sidebar, and chat panel frost automatically (their bg tokens are
    already translucent — this just adds the blur + a glassy hairline). */
 header,
 aside {
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(165%) brightness(1.03);
+  backdrop-filter: blur(var(--glass-blur)) saturate(165%) brightness(1.03);
 }
 
-/* App-wide aurora that the glass refracts. Sits behind all app content. */
-body::before {
+/* App-wide aurora that the glass refracts. Two stacked, slowly drifting
+   layers behind all content give the frosted surfaces real depth to bend. */
+body::before,
+body::after {
   content: '';
   position: fixed;
-  inset: -25%;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(38% 40% at 16% 20%, var(--aurora-1), transparent 70%),
-    radial-gradient(42% 44% at 84% 26%, var(--aurora-2), transparent 72%),
-    radial-gradient(48% 50% at 54% 86%, var(--aurora-3), transparent 72%);
-  filter: blur(50px) saturate(125%);
-  opacity: 0.5;
-  animation: aurora 44s ease-in-out infinite alternate;
   will-change: transform;
+}
+/* primary aurora — larger, brighter blobs */
+body::before {
+  inset: -30%;
+  background:
+    radial-gradient(34% 38% at 14% 18%, var(--aurora-1), transparent 70%),
+    radial-gradient(40% 42% at 86% 24%, var(--aurora-2), transparent 72%),
+    radial-gradient(46% 48% at 52% 88%, var(--aurora-3), transparent 72%),
+    radial-gradient(30% 34% at 72% 60%, var(--aurora-2), transparent 74%);
+  filter: blur(64px) saturate(130%);
+  opacity: 0.58;
+  animation: aurora 44s ease-in-out infinite alternate;
+}
+/* secondary aurora — softer, counter-drifting, for parallax-like depth */
+body::after {
+  inset: -35%;
+  background:
+    radial-gradient(40% 44% at 28% 72%, var(--aurora-3), transparent 72%),
+    radial-gradient(36% 40% at 78% 12%, var(--aurora-1), transparent 74%);
+  filter: blur(84px) saturate(120%);
+  opacity: 0.4;
+  animation: aurora2 62s ease-in-out infinite alternate;
 }
 @keyframes aurora {
   0%   { transform: translate(0, 0) scale(1); }
   50%  { transform: translate(3%, -2%) scale(1.08); }
   100% { transform: translate(-3%, 2%) scale(1.05); }
+}
+@keyframes aurora2 {
+  0%   { transform: translate(0, 0) scale(1.05); }
+  100% { transform: translate(4%, -3%) scale(1.13); }
 }
 
 /* ============================================================================
