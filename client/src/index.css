@@ -215,17 +215,20 @@ body::after {
   height: 0;
 }
 
-/* @-mention pills — match the mockup's data-entity spans */
+/* References — underlined links into the codex (from @-mentions or from the
+   underline-to-reference flow). Styled as an underlined name, not a pill. */
 .mention {
   color: var(--clay);
-  background: var(--clay-soft);
-  padding: 1px 6px;
-  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
   font-family: var(--font-body);
   white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-color: var(--clay);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 2.5px;
 }
+.mention:hover { text-decoration-color: var(--clay-2); color: var(--clay-2); }
 
 /* AI suggestion highlight (changed text in diff suggestion) */
 .ai-changed { background: var(--clay-soft); border-radius: 4px; padding: 0 2px; }

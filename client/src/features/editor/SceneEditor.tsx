@@ -17,9 +17,11 @@ import { useEditorUi } from '../../lib/editorUi';
 import { useActiveEditor } from './activeEditor';
 import { SlashCommand } from './SlashCommand';
 import { mentionExtension } from './mentionConfig';
+import { runReferenceLinker } from './referenceLinker';
 import type { Page } from '../../lib/types';
 
 const SAVE_DELAY = 800;
+const LINK_DELAY = 240;
 
 export function SceneEditor({ page, focused }: { page: Page; focused: boolean }) {
   const updatePageLocal = useStore((s) => s.updatePageLocal);
@@ -32,6 +34,7 @@ export function SceneEditor({ page, focused }: { page: Page; focused: boolean })
   const selectEntity = useStore((s) => s.selectEntity);
 
   const saveTimer = useRef<number | null>(null);
+  const linkTimer = useRef<number | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
   const pendingRange = useRef<Range | null>(null);
   const hoverTimer = useRef<number | null>(null);
@@ -78,6 +81,18 @@ export function SceneEditor({ page, focused }: { page: Page; focused: boolean })
       if (saveTimer.current) window.clearTimeout(saveTimer.current);
       setSaving('saving');
       saveTimer.current = window.setTimeout(() => save(editor), SAVE_DELAY);
+      // Convert underlined names / typed known names into codex references.
+      if (linkTimer.current) window.clearTimeout(linkTimer.current);
+      linkTimer.current = window.setTimeout(() => {
+        runReferenceLinker(editor, {
+          getEntities: () => useStore.getState().entities,
+          createCharacter: async (name) => {
+            const ent = await api.entities.create({ type: 'character', name });
+            await useStore.getState().refreshEntities();
+            return ent;
+          },
+        });
+      }, LINK_DELAY);
     },
     onFocus: ({ editor }) => setActive(editor, page.id),
     onSelectionUpdate: ({ editor }) => {

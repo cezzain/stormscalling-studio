@@ -1,4 +1,5 @@
 import Mention from '@tiptap/extension-mention';
+import { mergeAttributes } from '@tiptap/core';
 import { ReactRenderer } from '@tiptap/react';
 import { api } from '../../lib/api';
 import { MentionList, type MentionListRef } from './MentionList';
@@ -6,6 +7,17 @@ import type { Entity } from '../../lib/types';
 
 export const mentionExtension = Mention.configure({
   HTMLAttributes: { class: 'mention' },
+  // References read as the plain underlined name, not "@name". Override both
+  // renderText (copy / serialization) and renderHTML (the default prepends @).
+  renderText: ({ node }) => node.attrs.label ?? node.attrs.id,
+  renderHTML: ({ options, node }) => [
+    'span',
+    mergeAttributes(
+      { class: 'mention', 'data-type': 'mention', 'data-id': node.attrs.id, 'data-label': node.attrs.label },
+      options.HTMLAttributes,
+    ),
+    `${node.attrs.label ?? node.attrs.id}`,
+  ],
   suggestion: {
     char: '@',
     items: async ({ query }): Promise<Entity[]> => {
